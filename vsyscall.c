@@ -80,6 +80,14 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
 
             return 0;
         }
+        case VSYSCALL_READ: {
+            int fd = (int) arg1;
+            void *buf = (void*) arg2;
+            size_t nbytes = (size_t) arg3;
+
+            trace_syscall(("VSYSCALL_READ(%d, %p, %zu)\n", fd, buf, nbytes));
+            return read(0, buf, nbytes);
+        }
         case VSYSCALL_SETFS: {
             int rc = arch_prctl(ARCH_SET_FS, arg1);
             trace_syscall(("VSYSCALL_SETFS(%p)\n", arg1));

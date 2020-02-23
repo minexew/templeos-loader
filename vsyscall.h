@@ -13,6 +13,7 @@ enum {
     VSYSCALL_STAT =         6,
     VSYSCALL_STATCLUS =     7,
     VSYSCALL_FREAD =        8,
+    VSYSCALL_READ =         9,
 };
 
 struct CHostFsStat {
