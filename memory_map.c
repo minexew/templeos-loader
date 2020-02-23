@@ -10,7 +10,7 @@ int init_memory_map() {
     void* kernel_start = (void*) (KERNEL_START & ~(PAGE_SIZE - 1));
     size_t kernel_size = (void*) KERNEL_END - kernel_start;
 
-    fprintf(stderr, "kernel_start: %p\n", kernel_start);
+    //fprintf(stderr, "kernel_start: %p\n", kernel_start);
 
     void* p = mmap(kernel_start, kernel_size,
             PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);

@@ -34,7 +34,7 @@ void LoadOneImport(uint8_t** _src) {
                 first = 0;
                 //if (!(tmpex=HashFind(st_ptr, Fs->hash_table, HTG_ALL - HTT_IMPORT_SYS_SYM))) {
                     //if (!(ld_flags & LDF_SILENT))
-                        fprintf(stderr, "Unresolved Reference:%s\n", name);
+                    //    fprintf(stderr, "Unresolved Reference:%s\n", name);
                     /*tmpiss=CAlloc(sizeof(CHashImport));
                     tmpiss->str=StrNew(st_ptr);
                     tmpiss->type=HTT_IMPORT_SYS_SYM;
@@ -85,12 +85,12 @@ int load_kernel(const char* path, void* address, size_t max_size) {
         return -1;
     }
 
-    printf("jmp\t%04Xh\n", bin_file.jmp);
-    printf("module_align_bits\t%d\n", bin_file.module_align_bits);
-    printf("signature\t%08X\n", bin_file.signature);
-    printf("module_org\t%016lXh\n", bin_file.module_org);
-    printf("patch_table_offset\t%lXh\n", bin_file.patch_table_offset);
-    printf("file_size\t%ld\n", bin_file.file_size);
+    //printf("jmp\t%04Xh\n", bin_file.jmp);
+    //printf("module_align_bits\t%d\n", bin_file.module_align_bits);
+    //printf("signature\t%08X\n", bin_file.signature);
+    //printf("module_org\t%016lXh\n", bin_file.module_org);
+    //printf("patch_table_offset\t%lXh\n", bin_file.patch_table_offset);
+    //printf("file_size\t%ld\n", bin_file.file_size);
 
     // Load starting at 7c00, INCLUDING THE BIN HEADER
     // The header is not actually needed for anything at runtime (I think),
@@ -113,7 +113,7 @@ int load_kernel(const char* path, void* address, size_t max_size) {
         char* name = src;
         src += strlen(name) + 1;
 
-        printf("%d\t%08lX\t%s\n", etype, i, name);
+        //printf("%d\t%08lX\t%s\n", etype, i, name);
 
         switch (etype) {
             case IET_REL32_EXPORT:

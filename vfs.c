@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
+enum { CLUS_MIN = 10 };
 enum { COUNT = 1000 };
 
 struct statcache {
@@ -31,7 +32,7 @@ static char const* get_sandboxed_path(char const *path) {
 }
 
 static struct statcache* get_node_by_clus(clus_t clus) {
-    int index = clus - 1;
+    intptr_t index = clus - CLUS_MIN;
 
     if (index >= 0 && index < COUNT && cache[index].native_path) {
         return &cache[index];
@@ -56,7 +57,7 @@ static struct statcache* get_node_by_path(char const *vfs_path) {
     }
 
     cache[i].native_path = strdup(native_path);
-    cache[i].assigned_clus = 1 + i;
+    cache[i].assigned_clus = CLUS_MIN + i;
     cache[i].abs_path = strdup(vfs_path);
 }
 
