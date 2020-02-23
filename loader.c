@@ -94,8 +94,8 @@ void handler(int code, siginfo_t *info, void *ctx) {
 } kvm_calltable_t;*/
 
 int main(int argc, char** argv) {
-	printf("pid: %d\n", getpid());
-    printf("pc: %p\n", get_pc());
+	//printf("pid: %d\n", getpid());
+    //printf("pc: %p\n", get_pc());
 
 	/* init memory map */
 	if (init_memory_map() < 0)
@@ -135,15 +135,15 @@ int main(int argc, char** argv) {
     //ct.Putchar = &TempleOS_Putchar;
     //memcpy((void*) (KERNEL_START + sizeof(struct CBinFile)), &ct, sizeof(ct));
 
-    printf("_VSYSCALL: %p\n", VSysCall_sym->address);
+    //printf("_VSYSCALL: %p\n", VSysCall_sym->address);
 
     *(uint64_t*)VSysCall_sym->address = (uint64_t) &vsyscall_dispatcher;
 
 //printf("putchar: %p\n", TempleOS_Putchar);
-    printf("vsyscall_dispatcher: %p\n", vsyscall_dispatcher);
+//    printf("vsyscall_dispatcher: %p\n", vsyscall_dispatcher);
 	/* jump to it */
 	/* past this point, Fs/Gs will be clobbered so we should not use glibc functions */
-    printf("KMain: %p\n", KMain_sym->address);
+    //printf("KMain: %p\n", KMain_sym->address);
     void (*KMain)() = (void(*)()) KMain_sym->address;
 
     KMain();

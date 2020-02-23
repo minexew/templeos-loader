@@ -3,6 +3,7 @@
 #include "vfs.h"
 #include "vsyscall.h"
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -45,7 +46,39 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
         }
         case VSYSCALL_PUTCHAR: {
             uint8_t c = arg1;
-            return write(1, &c, 1);
+
+            static bool fmt_mode = 0;
+            static char fmt_buf[16];
+            static size_t fmt_used;
+
+            if (!fmt_mode) {
+                if (c == '$') {
+                    fmt_mode = true;
+                    fmt_used = 0;
+                }
+                else {
+                    write(1, &c, 1);
+                }
+            }
+            else {
+                if (c == '$') {
+                    fmt_buf[fmt_used] = 0;
+                    //apply_fmt(fmt_buf);
+                    fmt_mode = false;
+                }
+                else {
+                    fmt_buf[fmt_used++] = c;
+
+                    if (fmt_used + 1 == sizeof(fmt_buf)) {
+                        c = '$';
+                        write(1, &c, 1);
+                        write(1, fmt_buf, fmt_used);
+                        fmt_mode = false;
+                    }
+                }
+            }
+
+            return 0;
         }
         case VSYSCALL_SETFS: {
             int rc = arch_prctl(ARCH_SET_FS, arg1);
