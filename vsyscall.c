@@ -18,6 +18,14 @@ long arch_prctl(int, unsigned long);
 
 int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg3) {
     switch (num) {
+        case VSYSCALL_ADDSYM: {
+            const char* name = (const char*) arg1;
+            void* addr = (void*) arg2;
+            trace_syscall(("VSYSCALL_ADDSYM(%s, %p)", name, addr));
+
+            addsym(name, addr);
+            return 0;
+        }
         case VSYSCALL_DEBUG: {
             printf("[DEBUG] %s\t%d\t%08X\n", (const char*) arg1, arg2, arg2);
             return 0;
