@@ -123,7 +123,7 @@ int load_kernel(const char* path, void* address, size_t max_size) {
                 if (etype == IET_REL32_EXPORT || etype == IET_REL64_EXPORT)
                     i += module_base;
 
-                addsym(name, (void*) i);
+                addsym("Kernel", name, (void*) i);
                 break;
 
             case IET_REL_I0:

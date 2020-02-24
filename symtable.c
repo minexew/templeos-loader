@@ -14,10 +14,11 @@ struct sym* lookupsym(void* address) {
     return NULL;
 }
 
-void addsym(const char* name, void* address) {
+void addsym(const char* module, const char* name, void* address) {
     // the list is sorted by address (syms points to the highest-address symbol)
 
     struct sym* sym = (struct sym*) malloc(sizeof(struct sym));
+    sym->module = strdup(module);           // Hugely inefficient and we don't care
     sym->name = strdup(name);
     sym->address = address;
 
@@ -26,6 +27,10 @@ void addsym(const char* name, void* address) {
 
     // find the first symbol after this one
     for (curr = syms; curr; curr = curr->next) {
+        if (address == curr->address)
+            // fuck
+            return;
+
         if (address >= curr->address)
             break;
 

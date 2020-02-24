@@ -1,10 +1,12 @@
 #include "memory_map.h"
+#include "symtable.h"
 #include "templeos.h"
 #include "vfs.h"
 #include "vsyscall.h"
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -19,22 +21,26 @@ long arch_prctl(int, unsigned long);
 int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg3) {
     switch (num) {
         case VSYSCALL_ADDSYM: {
-            const char* name = (const char*) arg1;
-            void* addr = (void*) arg2;
-            trace_syscall(("VSYSCALL_ADDSYM(%s, %p)", name, addr));
+            const char* module = (const char*) arg1;
+            const char* name = (const char*) arg2;
+            void* addr = (void*) arg3;
+            trace_syscall(("VSYSCALL_ADDSYM(%s, %s, %p)\n", module, name, addr));
 
-            addsym(name, addr);
+            addsym(module, name, addr);
             return 0;
         }
         case VSYSCALL_DEBUG: {
             printf("[DEBUG] %s\t%d\t%08X\n", (const char*) arg1, arg2, arg2);
             return 0;
         }
+        case VSYSCALL_EXIT: {
+            exit(arg1);
+        }
         case VSYSCALL_FREAD: {
             const char* path = (const char*) arg1;
             uint8_t* buf = (uint8_t*) arg2;
             size_t bufsiz = (size_t) arg3;
-            trace_syscall(("VSYSCALL_FREAD(%s, %p, %d)", path, buf, bufsiz));
+            trace_syscall(("VSYSCALL_FREAD(%s, %p, %d)\n", path, buf, bufsiz));
 
             FILE* f = vfs_fopen(path, "rb");
             if (f) {
@@ -42,6 +48,25 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
                 fclose(f);
                 trace_syscall((" -> %zd\n", read));
                 return read;
+            }
+            else {
+                trace_syscall((" -> error\n"));
+                return 0;
+            }
+        }
+        case VSYSCALL_FWRITE: {
+            const char* path = (const char*) arg1;
+            const uint8_t* buf = (const uint8_t*) arg2;
+            size_t bufsiz = (size_t) arg3;
+            trace_syscall(("VSYSCALL_FWRITE(%s, %p, %d)\n", path, buf, bufsiz));
+            printf("VSYSCALL_FWRITE(%s, %p, %d)\n", path, buf, bufsiz);
+
+            FILE* f = fopen("Out.BIN", "wb");
+            if (f) {
+                size_t written = fwrite(buf, 1, bufsiz, f);
+                fclose(f);
+                trace_syscall((" -> %zd\n", written));
+                return written;
             }
             else {
                 trace_syscall((" -> error\n"));
@@ -109,7 +134,7 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
         case VSYSCALL_STATCLUS: {
             clus_t clus = arg1;
             struct CHostFsStat* st_out = (struct CHostFsStat*) arg2;
-            trace_syscall(("VSYSCALL_STATCLUS(%d, %p)", (int) clus, st_out));
+            trace_syscall(("VSYSCALL_STATCLUS(%d, %p)\n", (int) clus, st_out));
 
             int rc = vfs_statclus(clus, st_out);
             trace_syscall((" -> %d\n", rc));
@@ -118,7 +143,7 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
         case VSYSCALL_STAT: {
             const char* path = (const char*) arg1;
             struct CHostFsStat* st_out = (struct CHostFsStat*) arg2;
-            trace_syscall(("VSYSCALL_STAT(%s, %p)", path, st_out));
+            trace_syscall(("VSYSCALL_STAT(%s, %p)\n", path, st_out));
 
             int rc = vfs_stat(path, st_out);
             trace_syscall((" -> %d\n", rc));

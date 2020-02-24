@@ -39,7 +39,7 @@ __attribute__((noreturn)) static void bugcheck(ucontext_t* u) {
         struct sym* guest_symbol = lookupsym(addr);
 
         if (guest_symbol)
-            printf("\t%s+%lxh", guest_symbol->name, addr - guest_symbol->address);
+            printf("\t%s::%s+%lxh", guest_symbol->module, guest_symbol->name, addr - guest_symbol->address);
 
         printf("\n");
 
@@ -74,7 +74,9 @@ void handler(int code, siginfo_t *info, void *ctx) {
 
         // Neutralized in kernel via #define in VKernel.HH, but may show up in Adam + apps
         if (rip >= KERNEL_START && rip < FLAT_START + FLAT_SIZE && *(uint8_t*) rip == 0xFA) {
-            fprintf(stderr, "NOTE: patching out CLI instruction (opcode %02Xh) @ %p\n", *(uint8_t*) rip, rip);
+            //  hangs in libc :(
+            // probably because we fuck with the memory so much
+            //fprintf(stderr, "NOTE: patching out CLI instruction (opcode %02Xh) @ %p\n", *(uint8_t*) rip, rip);
             int NOP = 0x90;
             *(uint8_t*) rip = NOP;
             return;

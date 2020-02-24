@@ -11,8 +11,9 @@
 #define FLAT_START 0x1000000
 
 // Adam needs at least 16 MB for its heap, otherwise silent heap corruption happens
-// 32 MB memory for now
-// +4KiB because MAlloc seems to overallocate at the end???
-#define FLAT_SIZE  0x2001000
+// Later corruption happens in Compiler if you only allocate 32 MB
+// 64 MB memory for now
+// +4KiB because MAlloc seems to overallocate at the end
+#define FLAT_SIZE  0x4001000
 
 int init_memory_map();

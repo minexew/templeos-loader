@@ -15,6 +15,8 @@ enum {
     VSYSCALL_FREAD =        8,
     VSYSCALL_READ =         9,
     VSYSCALL_ADDSYM =       10,
+    VSYSCALL_FWRITE =       11,
+    VSYSCALL_EXIT =         12,
 };
 
 struct CHostFsStat {
