@@ -3,7 +3,9 @@
 
 #include "physfs.h"
 
+#include <libgen.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 
@@ -16,6 +18,12 @@ enum { CLUS_MIN = 1 };
 struct clus_assignment {
     char*       path;
     uint64_t    clus;
+};
+
+struct vfs_dir_t {
+    char* path;
+    char** list;
+    size_t pos;
 };
 
 enum { MAX_ASSIGNMENTS = 1000 };
@@ -46,13 +54,19 @@ static struct clus_assignment* get_node_by_path(char const* path) {
 }
 
 void vfs_init(const char* argv0, const char* vfspath, const char* writepath) {
-  // TODO: handle errors
-  PHYSFS_init(argv0);
-  PHYSFS_setWriteDir(writepath);
+    // TODO: handle errors
+    PHYSFS_init(argv0);
+    PHYSFS_setWriteDir(writepath);
 
-  // "The write dir is not included in the search path unless you specifically add it."
-  PHYSFS_mount(writepath, "/", 1);
-  PHYSFS_mount(vfspath, "/", 1);
+    // "The write dir is not included in the search path unless you specifically add it."
+    PHYSFS_mount(writepath, "/", 1);
+    PHYSFS_mount(vfspath, "/", 1);
+}
+
+int vfs_closedir(struct vfs_dir_t* dirp) {
+    free(dirp->path);
+    PHYSFS_freeList(dirp->list);
+    free(dirp);
 }
 
 size_t vfs_fget(const char* path, uint8_t* buf, size_t bufsiz) {
@@ -81,15 +95,36 @@ size_t vfs_fput(const char* path, const uint8_t* buf, size_t bufsiz) {
     }
 }
 
-// FILE *vfs_fopen(const char *path, const char *mode) {
-//     struct statcache *cache = get_node_by_path(path);
+struct vfs_dir_t* vfs_opendir(const char* path) {
+    char** list = PHYSFS_enumerateFiles(path);
 
-//     if (!cache) {
-//         return NULL;
-//     }
+    if (!list) {
+        return NULL;
+    }
 
-//     return fopen(cache->native_path, mode);
-// }
+    struct vfs_dir_t* d = (struct vfs_dir_t*) malloc(sizeof(struct vfs_dir_t));
+    d->path = strdup(path);
+    d->list = list;
+    d->pos = 0;
+    return d;
+}
+
+int vfs_readdir(struct vfs_dir_t* dirp, struct CHostFsStat* st_out) {
+    if (!dirp->list[dirp->pos]) {
+        return -1;
+    }
+
+    char buf[4096];
+    snprintf(buf, sizeof(buf), "%s/%s", dirp->path, dirp->list[dirp->pos++]);
+
+    if (vfs_stat(buf, st_out) != -1) {
+        // maybe file disappeared in the mean-time?
+        // re-try in a recursive way. not the cleanest design.
+        return vfs_readdir(dirp, st_out);
+    }
+
+    return 0;
+}
 
 int vfs_stat(const char* path, struct CHostFsStat* st_out) {
     PHYSFS_Stat st;
@@ -111,6 +146,7 @@ int vfs_stat(const char* path, struct CHostFsStat* st_out) {
     st_out->size = st.filesize;
     st_out->clus = assignment->clus;
     st_out->abs_path = assignment->path;
+    st_out->path = basename(st_out->abs_path);
 
     return 0;
 }

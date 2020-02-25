@@ -17,13 +17,17 @@ enum {
     VSYSCALL_ADDSYM =       10,
     VSYSCALL_FPUT =         11,
     VSYSCALL_EXIT =         12,
+    VSYSCALL_OPENDIR =      13,
+    VSYSCALL_READDIR =      14,
+    VSYSCALL_CLOSEDIR =     15,
 };
 
 struct CHostFsStat {
-    uint16_t attr;
-    uint16_t pad[3];
-    int64_t clus, size;
-    char *abs_path;
+    uint16_t    attr;
+    uint16_t    pad[3];
+    int64_t     clus, size;
+    char*       abs_path;
+    char*       path;
 };
 
 int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg3);

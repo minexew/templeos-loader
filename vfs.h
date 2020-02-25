@@ -14,4 +14,8 @@ size_t vfs_fput(const char* path, const uint8_t* buf, size_t bufsiz);
 int vfs_stat(const char* path, struct CHostFsStat* st_out);
 int vfs_statclus(clus_t clus, struct CHostFsStat* st_out);
 
+struct vfs_dir_t* vfs_opendir(const char* path);
+int vfs_readdir(struct vfs_dir_t* dirp, struct CHostFsStat* st_out);
+int vfs_closedir(struct vfs_dir_t* dirp);
+
 #endif
