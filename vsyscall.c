@@ -36,6 +36,12 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             addsym(module, name, addr);
             return 0;
         }
+        case VSYSCALL_CLOSEDIR: {
+            struct vfs_dir_t* dirp = (struct vfs_dir_t*) arg1;
+
+            trace_syscall(("VSYSCALL_CLOSEDIR(%p)\n", dirp));
+            return vfs_closedir(dirp);
+        }
         case VSYSCALL_DEBUG: {
             printf("[DEBUG] %s\t%d\t%08X\n", (const char*) arg1, arg2, arg2);
             return 0;
@@ -56,13 +62,18 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             const uint8_t* buf = (const uint8_t*) arg2;
             size_t bufsiz = (size_t) arg3;
             trace_syscall(("VSYSCALL_FPUT(%s, %p, %d)\n", path, buf, bufsiz));
-            printf("VSYSCALL_FPUT(%s, %p, %d)\n", path, buf, bufsiz);
 
             return vfs_fput(path, buf, bufsiz);
         }
         case VSYSCALL_MEMSIZE: {
             trace_syscall(("VSYSCALL_MEMSIZE\n"));
             return FLAT_SIZE - 0x1000;
+        }
+        case VSYSCALL_OPENDIR: {
+            const char* path = (const char*) arg1;
+
+            trace_syscall(("VSYSCALL_OPENDIR(%s)\n", path));
+            return (int64_t) vfs_opendir(path);
         }
         case VSYSCALL_PUTCHAR: {
             uint8_t c = arg1;
@@ -107,6 +118,13 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
 
             trace_syscall(("VSYSCALL_READ(%d, %p, %zu)\n", fd, buf, nbytes));
             return read(0, buf, nbytes);
+        }
+        case VSYSCALL_READDIR: {
+            struct vfs_dir_t* dirp = (struct vfs_dir_t*) arg1;
+            struct CHostFsStat* st_out = (struct CHostFsStat*) arg2;
+
+            trace_syscall(("VSYSCALL_READDIR(%p, %p)\n", dirp, st_out));
+            return vfs_readdir(dirp, st_out);
         }
         case VSYSCALL_SETFS: {
             int rc = arch_prctl(ARCH_SET_FS, arg1);

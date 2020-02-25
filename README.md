@@ -6,7 +6,7 @@ For this reason, to avoid crashing, you must use a libc that is more "accomodati
     git clone git://git.musl-libc.org/musl musl-src
     cd musl-src
     ./configure --prefix=~/musl --disable-shared
-    make
+    make install
     cd ..
 
 ## Build PhysFS
@@ -25,7 +25,7 @@ For this reason, to avoid crashing, you must use a libc that is more "accomodati
 
 ## Run
 
-    mkdir -p Writable/Kernel    # Ensure disrs exist
+    mkdir -p Writable/Compiler Writable/Kernel # Ensure dirs exist
     ~/templeos-loader/build/templeos-loader Kernel/VKernel.BIN . Writable
 
 One advantage of the described approach is that the resulting binary is linked statically and thus portable to any x86-64 Linux system
