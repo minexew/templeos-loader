@@ -4,6 +4,7 @@
 #include "memory_map.h"
 #include "templeos.h"
 #include "symtable.h"
+#include "vfs.h"
 #include "vsyscall.h"
 
 #include <stdio.h>
@@ -17,7 +18,8 @@
 #include <unistd.h>
 
 // backtrace
-#include <execinfo.h>
+// if not musl:
+//#include <execinfo.h>
 
 void* get_pc () { return __builtin_return_address(0); }
 
@@ -119,6 +121,9 @@ int main(int argc, char** argv) {
         fprintf(stderr, "can't find symbol \"_VSYSCALL_DISPATCHER\"\n");
         exit(-1);
     }
+
+    /* VFS init */
+    vfs_init(argv[0], argv[2], argv[3]);
 
     /* install trap handler */
     struct sigaction sa = { };

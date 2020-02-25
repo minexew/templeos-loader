@@ -11,8 +11,15 @@
 #include <unistd.h>
 
 // arch_prctl
-#include <asm/prctl.h>
+//if not musl:
+//#include <asm/prctl.h>
 #include <sys/prctl.h>
+#ifndef ARCH_SET_GS
+#define ARCH_SET_GS             0x1001
+#endif
+#ifndef ARCH_SET_FS
+#define ARCH_SET_FS             0x1002
+#endif
 long arch_prctl(int, unsigned long);
 
 //#define trace_syscall(args) printf args
@@ -36,42 +43,22 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
         case VSYSCALL_EXIT: {
             exit(arg1);
         }
-        case VSYSCALL_FREAD: {
+        case VSYSCALL_FGET: {
             const char* path = (const char*) arg1;
             uint8_t* buf = (uint8_t*) arg2;
             size_t bufsiz = (size_t) arg3;
-            trace_syscall(("VSYSCALL_FREAD(%s, %p, %d)\n", path, buf, bufsiz));
+            trace_syscall(("VSYSCALL_FGET(%s, %p, %d)\n", path, buf, bufsiz));
 
-            FILE* f = vfs_fopen(path, "rb");
-            if (f) {
-                size_t read = fread(buf, 1, bufsiz, f);
-                fclose(f);
-                trace_syscall((" -> %zd\n", read));
-                return read;
-            }
-            else {
-                trace_syscall((" -> error\n"));
-                return 0;
-            }
+            return vfs_fget(path, buf, bufsiz);
         }
-        case VSYSCALL_FWRITE: {
+        case VSYSCALL_FPUT: {
             const char* path = (const char*) arg1;
             const uint8_t* buf = (const uint8_t*) arg2;
             size_t bufsiz = (size_t) arg3;
-            trace_syscall(("VSYSCALL_FWRITE(%s, %p, %d)\n", path, buf, bufsiz));
-            printf("VSYSCALL_FWRITE(%s, %p, %d)\n", path, buf, bufsiz);
+            trace_syscall(("VSYSCALL_FPUT(%s, %p, %d)\n", path, buf, bufsiz));
+            printf("VSYSCALL_FPUT(%s, %p, %d)\n", path, buf, bufsiz);
 
-            FILE* f = fopen("Out.BIN", "wb");
-            if (f) {
-                size_t written = fwrite(buf, 1, bufsiz, f);
-                fclose(f);
-                trace_syscall((" -> %zd\n", written));
-                return written;
-            }
-            else {
-                trace_syscall((" -> error\n"));
-                return 0;
-            }
+            return vfs_fput(path, buf, bufsiz);
         }
         case VSYSCALL_MEMSIZE: {
             trace_syscall(("VSYSCALL_MEMSIZE\n"));

@@ -12,10 +12,10 @@ enum {
     VSYSCALL_PUTCHAR =      5,
     VSYSCALL_STAT =         6,
     VSYSCALL_STATCLUS =     7,
-    VSYSCALL_FREAD =        8,
+    VSYSCALL_FGET =         8,
     VSYSCALL_READ =         9,
     VSYSCALL_ADDSYM =       10,
-    VSYSCALL_FWRITE =       11,
+    VSYSCALL_FPUT =         11,
     VSYSCALL_EXIT =         12,
 };
 
