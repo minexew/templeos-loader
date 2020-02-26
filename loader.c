@@ -133,6 +133,10 @@ int main(int argc, char** argv) {
         perror("sigaction() failed");
         exit(1);
     }
+    if (sigaction(SIGFPE, &sa, NULL)) {
+        perror("sigaction() failed");
+        exit(1);
+    }
     if (sigaction(SIGILL, &sa, NULL)) {
         perror("sigaction() failed");
         exit(1);
