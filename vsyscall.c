@@ -69,6 +69,12 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             trace_syscall(("VSYSCALL_MEMSIZE\n"));
             return FLAT_SIZE - 0x1000;
         }
+        case VSYSCALL_MKDIR: {
+            const char* path = (const char*) arg1;
+
+            trace_syscall(("VSYSCALL_MKDIR(%s)\n", path));
+            return vfs_mkdir(path);
+        }
         case VSYSCALL_OPENDIR: {
             const char* path = (const char*) arg1;
 
@@ -153,6 +159,12 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             int rc = vfs_stat(path, st_out);
             trace_syscall((" -> %d\n", rc));
             return rc;
+        }
+        case VSYSCALL_UNLINK: {
+            const char* path = (const char*) arg1;
+
+            trace_syscall(("VSYSCALL_UNLINK(%s)\n", path));
+            return vfs_unlink(path);
         }
         case VSYSCALL_USLEEP: {
             trace_syscall(("VSYSCALL_USLEEP(%d)\n", arg1));

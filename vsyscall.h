@@ -20,6 +20,8 @@ enum {
     VSYSCALL_OPENDIR =      13,
     VSYSCALL_READDIR =      14,
     VSYSCALL_CLOSEDIR =     15,
+    VSYSCALL_MKDIR =        16,
+    VSYSCALL_UNLINK =       17,
 };
 
 struct CHostFsStat {
@@ -27,7 +29,7 @@ struct CHostFsStat {
     uint16_t    pad[3];
     int64_t     clus, size;
     char*       abs_path;
-    char*       path;
+    char*       name;
 };
 
 int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg3);

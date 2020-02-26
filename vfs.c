@@ -95,6 +95,15 @@ size_t vfs_fput(const char* path, const uint8_t* buf, size_t bufsiz) {
     }
 }
 
+int vfs_mkdir(const char* path) {
+    if (PHYSFS_mkdir(path) ) {
+        return 0;
+    }
+    else {
+        return -1;
+    }
+}
+
 struct vfs_dir_t* vfs_opendir(const char* path) {
     char** list = PHYSFS_enumerateFiles(path);
 
@@ -146,7 +155,7 @@ int vfs_stat(const char* path, struct CHostFsStat* st_out) {
     st_out->size = st.filesize;
     st_out->clus = assignment->clus;
     st_out->abs_path = assignment->path;
-    st_out->path = basename(st_out->abs_path);
+    st_out->name = basename(st_out->abs_path);
 
     return 0;
 }
@@ -173,4 +182,13 @@ int vfs_statclus(clus_t clus, struct CHostFsStat* st_out) {
     st_out->abs_path = assignment->path;
 
     return 0;
+}
+
+int vfs_unlink(const char* path) {
+    if (PHYSFS_delete(path) ) {
+        return 0;
+    }
+    else {
+        return -1;
+    }
 }
