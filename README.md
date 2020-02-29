@@ -1,3 +1,5 @@
+# TempleOS user-space loader
+
 glibc definitely does not appreciate the way we handle memory.
 For this reason, to avoid crashing, you must use a libc that is more "accomodating", such as musl
 
@@ -23,9 +25,26 @@ For this reason, to avoid crashing, you must use a libc that is more "accomodati
     env CC=musl-gcc PHYSFSDIR=~/physfs/ cmake ..
     cmake --build .
 
+One advantage of the described approach is that the resulting binary is linked statically and thus portable to any x86-64 Linux system
+
 ## Run
 
-    mkdir -p Writable/Compiler Writable/Kernel # Ensure dirs exist
-    ~/templeos-loader/build/templeos-loader Kernel/VKernel.BIN . Writable
+    # checkout shrine-v6 branch VKernel
+    cd $SHRINEV6_DIR
+    # Ensure dirs exist
+    mkdir -p Writable/Compiler Writable/Kernel
+    # Recompile the kernel (example)
+    # templeos-loader <vkernel> <rootfs> <rw-overlay> <my-startos.hc>
+    $LOADER_DIR/build/templeos-loader Kernel/VKernel.BIN . Writable CompileKernel.HC
 
-One advantage of the described approach is that the resulting binary is linked statically and thus portable to any x86-64 Linux system
+# TODO
+
+- Explicit handling of StartOS.HC + Compiler in VKernel (syscall to retrieve env configuration)
+- Proper commandline parsing
+- bug: PhysFS will not create necessary directories that exist in RO but not in RW overlay!!
+- implement fopen, fread, fwrite as syscalls
+- Implement date & time syscalls
+- Return date & time in HostFsStat_t
+- basedir() call is questionable
+- Clean up syscalls
+- Fix CI -- needs to also use musl libc
