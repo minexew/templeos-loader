@@ -26,7 +26,7 @@ struct vfs_dir_t {
     size_t pos;
 };
 
-enum { MAX_ASSIGNMENTS = 1000 };
+enum { MAX_ASSIGNMENTS = 10000 };       // FIXME: handle dynamically
 struct clus_assignment assignments[MAX_ASSIGNMENTS];
 
 static struct clus_assignment* get_node_by_clus(clus_t clus) {
