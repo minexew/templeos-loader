@@ -33,9 +33,13 @@ One advantage of the described approach is that the resulting binary is linked s
     cd $SHRINEV6_DIR
     # Ensure dirs exist
     mkdir -p Writable/Compiler Writable/Kernel
+
     # Recompile the kernel (example)
     # templeos-loader <vkernel> <rootfs> <rw-overlay> <my-startos.hc>
     $LOADER_DIR/build/templeos-loader Kernel/VKernel.BIN . Writable CompileKernel.HC
+
+    # test that newly compiler kernel works as expected
+    $LOADER_DIR/build/templeos-loader Writable/Kernel/VKernel.BIN.C . Writable CompileKernel.HC
 
 # TODO
 
