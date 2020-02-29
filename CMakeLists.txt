@@ -17,4 +17,4 @@ add_executable("templeos-loader"
         vfs.h vfs.c)
 
 target_include_directories("templeos-loader" PRIVATE ${PHYSFS_INCLUDE_DIR})
-target_link_libraries("templeos-loader" PRIVATE ${PHYSFS_LIBRARY})
+target_link_libraries("templeos-loader" PRIVATE ${PHYSFS_LIBRARY} -static)

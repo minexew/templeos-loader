@@ -38,7 +38,7 @@ One advantage of the described approach is that the resulting binary is linked s
     # templeos-loader <vkernel> <rootfs> <rw-overlay> <my-startos.hc>
     $LOADER_DIR/build/templeos-loader Kernel/VKernel.BIN . Writable CompileKernel.HC
 
-    # test that newly compiler kernel works as expected
+    # test that newly compiled kernel works as expected
     $LOADER_DIR/build/templeos-loader Writable/Kernel/VKernel.BIN.C . Writable CompileKernel.HC
 
 # TODO
