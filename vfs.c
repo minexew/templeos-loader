@@ -126,7 +126,7 @@ int vfs_readdir(struct vfs_dir_t* dirp, struct CHostFsStat* st_out) {
     char buf[4096];
     snprintf(buf, sizeof(buf), "%s/%s", dirp->path, dirp->list[dirp->pos++]);
 
-    if (vfs_stat(buf, st_out) != -1) {
+    if (vfs_stat(buf, st_out) != 0) {
         // maybe file disappeared in the mean-time?
         // re-try in a recursive way. not the cleanest design.
         return vfs_readdir(dirp, st_out);
