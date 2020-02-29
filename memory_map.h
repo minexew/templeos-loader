@@ -12,8 +12,9 @@
 
 // Adam needs at least 16 MB for its heap, otherwise silent heap corruption happens
 // Later corruption happens in Compiler if you only allocate 32 MB
-// 64 MB memory for now
+// But because file handling in VKernel currently uses up a lot of memory, we go generous:
+// TempleOS declares 512Meg minimum, and so this is what it gets
 // +4KiB because MAlloc seems to overallocate at the end
-#define FLAT_SIZE  0x4001000
+#define FLAT_SIZE  0x20001000
 
 int init_memory_map();
