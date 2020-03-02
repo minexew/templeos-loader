@@ -21,8 +21,6 @@
 // if not musl:
 //#include <execinfo.h>
 
-static const char* startos_path;
-
 void* get_pc () { return __builtin_return_address(0); }
 
 __attribute__((noreturn)) static void bugcheck(ucontext_t* u) {
@@ -95,10 +93,6 @@ void handler(int code, siginfo_t *info, void *ctx) {
     bugcheck(u);
 }
 
-const char* get_startos_path(void) {
-    return startos_path;
-}
-
 /*typedef struct {
 	int64_t (*Putchar)(int64_t);
 } kvm_calltable_t;*/
@@ -107,8 +101,8 @@ int main(int argc, char** argv) {
 	//printf("pid: %d\n", getpid());
     //printf("pc: %p\n", get_pc());
 
-    if (argc < 5) {
-        fprintf(stderr, "usage: templeos-loader <kernel> <rootfs> <writable> <StartOS.HC>\n");
+    if (argc != 4) {
+        fprintf(stderr, "usage: templeos-loader <kernel> <rootfs> <writable>\n");
         exit(-1);
     }
 
@@ -135,7 +129,6 @@ int main(int argc, char** argv) {
 
     /* VFS init */
     vfs_init(argv[0], argv[2], argv[3]);
-    startos_path = argv[4];
 
     /* install trap handler */
     struct sigaction sa = { };

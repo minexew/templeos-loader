@@ -1,3 +1,4 @@
+#include "host.h"
 #include "load_kernel.h"
 #include "symtable.h"
 #include "templeos.h"
@@ -8,7 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 
-void LoadOneImport(uint8_t** _src) {
+void LoadOneImport(size_t module_base, uint8_t** _src) {
     // wtf!
 
     uint8_t *src = *_src;
@@ -44,26 +45,25 @@ void LoadOneImport(uint8_t** _src) {
                 //}
             }
         }
-/*
-        if (tmpex) {
-          ptr2=module_base+i;
-          if (tmpex->type & HTT_FUN)
-        i=tmpex(CHashFun *)->exe_addr;
-          else if (tmpex->type & HTT_GLBL_VAR)
-        i=tmpex(CHashGlblVar *)->data_addr;
-          else
-        i=tmpex->val;
+
+        // resolve Host API calls
+        uintptr_t ptr2=module_base+i;
+        i = (uintptr_t) host_get_API_by_name(name);
+
+        if (!i) {
+            continue;
+        }
+
           switch (etype) {
-        case IET_REL_I8:  *ptr2(U8 *) =i-ptr2-1; break;
-        case IET_IMM_U8:  *ptr2(U8 *) =i;  break;
-        case IET_REL_I16: *ptr2(U16 *)=i-ptr2-2; break;
-        case IET_IMM_U16: *ptr2(U16 *)=i; break;
-        case IET_REL_I32: *ptr2(U32 *)=i-ptr2-4; break;
-        case IET_IMM_U32: *ptr2(U32 *)=i; break;
-        case IET_REL_I64: *ptr2(I64 *)=i-ptr2-8; break;
-        case IET_IMM_I64: *ptr2(I64 *)=i; break;
+            case IET_REL_I8:  *(uint8_t*)ptr2 =i-ptr2-1; break;
+            case IET_IMM_U8:  *(uint8_t*)ptr2 =i;  break;
+            case IET_REL_I16: *(uint16_t*)ptr2=i-ptr2-2; break;
+            case IET_IMM_U16: *(uint16_t*)ptr2=i; break;
+            case IET_REL_I32: *(uint32_t*)ptr2=i-ptr2-4; break;
+            case IET_IMM_U32: *(uint32_t*)ptr2=i; break;
+            case IET_REL_I64: *(uint64_t*)ptr2=i-ptr2-8; break;
+            case IET_IMM_I64: *(uint64_t*)ptr2=i; break;
           }
-        }*/
     }
 
     *_src = src - 1;
@@ -137,7 +137,7 @@ int load_kernel(const char* path, void* address, size_t max_size) {
             case IET_REL_I64:
             case IET_IMM_I64:
                 src = name - 5;
-                LoadOneImport(&src);
+                LoadOneImport(module_base, &src);
                 break;
 
             case IET_ABS_ADDR:

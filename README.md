@@ -31,19 +31,30 @@ One advantage of the described approach is that the resulting binary is linked s
 
     # checkout shrine-v6 branch VKernel
     cd $SHRINEV6_DIR
-    # Ensure dirs exist
+
+    # bootstrap the necessary binaries
     mkdir -p Writable/Compiler Writable/Kernel
+    cp $LOADER_DIR/bootstrap/Compiler.BIN Writable/Compiler/
+    cp $LOADER_DIR/bootstrap/VKernel.BIN VKernel-good.BIN
 
     # Recompile the kernel (example)
-    # templeos-loader <vkernel> <rootfs> <rw-overlay> <my-startos.hc>
-    $LOADER_DIR/build/templeos-loader Kernel/VKernel.BIN . Writable CompileKernel.HC
+    # templeos-loader <vkernel> <rootfs> <rw-overlay>
+    env STARTOS=CompileKernel.HC $LOADER_DIR/build/templeos-loader VKernel-good.BIN . Writable
 
-    # test that newly compiled kernel works as expected
-    $LOADER_DIR/build/templeos-loader Writable/Kernel/VKernel.BIN.C . Writable CompileKernel.HC
+    # now test that newly compiled kernel works as expected
+    env STARTOS=CompileKernel.HC $LOADER_DIR/build/templeos-loader Writable/Kernel/VKernel.BIN.C . Writable
+
+## Environment variables
+
+loader is actually agnostic to these, but for now we document them here:
+
+- `COMPILER` (default _Compiler_) - compiler binary path relative to /Compiler/
+- `STARTOS` (default _StartOS_) - StartOS.HC path relative to /
+
+Note that these paths are constrained to the virtualized rootfs!
 
 # TODO
 
-- Explicit handling of StartOS.HC + Compiler in VKernel (syscall to retrieve env configuration)
 - Proper commandline parsing
 - bug: PhysFS will not create necessary directories that exist in RO but not in RW overlay!!
 - implement fopen, fread, fwrite as syscalls
@@ -52,3 +63,17 @@ One advantage of the described approach is that the resulting binary is linked s
 - basedir() call is questionable
 - Clean up syscalls
 - Fix CI -- needs to also use musl libc
+
+# Design details
+
+To be covered in a series of blog posts.
+
+## Calling conventions
+
+See https://www.jwhitham.org/2015/07/redirecting-system-calls-from-c-library.html
+
+TempleOS calling convention: RAX function(<arguments on stack>)
+
+SysV ABI: EAX function(RDI, RSI, RDX, RCX, R8, R9)
+
+Goal: keep VKernel Host ABI-agnostic

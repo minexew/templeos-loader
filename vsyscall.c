@@ -23,9 +23,6 @@
 #endif
 long arch_prctl(int, unsigned long);
 
-// TODO cleanup
-const char* get_startos_path(void);
-
 //#define trace_syscall(args) printf args
 #define trace_syscall(args) do {} while(0)
 
@@ -58,20 +55,6 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             uint8_t* buf = (uint8_t*) arg2;
             size_t bufsiz = (size_t) arg3;
             trace_syscall(("VSYSCALL_FGET(%s, %p, %d)\n", path, buf, bufsiz));
-
-            if (!strcmp(path, "/StartOS.HC") || !strcmp(path, "//StartOS.HC")) {
-                // HACK WARNING
-                static bool startos_served = false;
-
-                if (!startos_served) {
-                    startos_served = true;
-
-                    FILE* f = fopen(get_startos_path(), "rb");
-                    size_t size = fread(buf, 1, bufsiz, f);
-                    fclose(f);
-                    return size;
-                }
-            }
 
             return vfs_fget(path, buf, bufsiz);
         }
