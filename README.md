@@ -55,7 +55,7 @@ One advantage of the described approach is that the resulting binary is linked s
     # now test that newly compiled kernel works as expected
     env STARTOS=CompileKernel.HC $LOADER_DIR/build/templeos-loader Writable/Kernel/VKernel.BIN.C . Writable
 
-### Building TempleOS ISO from scratch
+### Building TempleOS ISO from source
 
     # check out the TempleOS source tree
     git checkout https://github.com/cia-foundation/TempleOS.git
@@ -69,6 +69,9 @@ One advantage of the described approach is that the resulting binary is linked s
 
     # build it!
     env STARTOS=StartDoDistro $LOADER_DIR/build/templeos-loader VKernel-good.BIN . Writable
+
+    # look at the result
+    ls -l Writable/Tmp/MyDistro.ISO.C
 
 ## Environment variables
 
