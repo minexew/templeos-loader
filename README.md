@@ -1,9 +1,20 @@
 # TempleOS user-space loader
 
+## How is this useful?
+
+_templeos-loader_ allows you to use your Linux system for some tasks that previously required running full TempleOS on hardware or in a VM:
+
+- compiling the kernel, compiler, or a whole distribution ISO
+- running non-interactive HolyC programs (file processing, network services)
+
+However, the primary goal is not "to bring HolyC to Linux". The TempleOS programming environment is heavily graphics-based, and too unique to blend in with anything else. Therefore, in the long run, we would like to reproduce the complete, authentic TempleOS experience, in Linux user-space, without a clunky VM. 
+
+## Building
+
 glibc definitely does not appreciate the way we handle memory.
 For this reason, to avoid crashing, you must use a libc that is more "accomodating", such as musl
 
-## Build musl libc
+### Build musl libc
 
     git clone git://git.musl-libc.org/musl musl-src
     cd musl-src
@@ -11,14 +22,14 @@ For this reason, to avoid crashing, you must use a libc that is more "accomodati
     make install
     cd ..
 
-## Build PhysFS
+### Build PhysFS
 
     curl -L -O https://icculus.org/physfs/downloads/physfs-3.0.2.tar.bz2
     tar xfa physfs-3.0.2.tar.bz2
     cd physfs-3.0.2
     env CC=musl-gcc cmake -DCMAKE_INSTALL_PREFIX:PATH=~/physfs -DPHYSFS_BUILD_SHARED=OFF . && make install
 
-## Build templeos-loader
+### Build templeos-loader
 
     mkdir build
     cd build
@@ -43,6 +54,21 @@ One advantage of the described approach is that the resulting binary is linked s
 
     # now test that newly compiled kernel works as expected
     env STARTOS=CompileKernel.HC $LOADER_DIR/build/templeos-loader Writable/Kernel/VKernel.BIN.C . Writable
+
+### Building TempleOS ISO from scratch
+
+    # check out the TempleOS source tree
+    git checkout https://github.com/cia-foundation/TempleOS.git
+    cd TempleOS
+
+    # bootstrap the necessary programs
+    mkdir -p Writable/Compiler Writable/Kernel
+    cp $LOADER_DIR/bootstrap/Compiler.BIN Writable/Compiler/
+    cp $LOADER_DIR/bootstrap/VKernel.BIN VKernel-good.BIN
+    cp $LOADER_DIR/examples/StartDoDistro.HC Writable/
+
+    # build it!
+    env STARTOS=StartDoDistro $LOADER_DIR/build/templeos-loader VKernel-good.BIN . Writable
 
 ## Environment variables
 
