@@ -14,14 +14,18 @@ __attribute__((naked)) static void thunk_##func_() {\
         "push %rsi"                             "\r\n"\
         "push %rdx"                             "\r\n"\
         "push %rcx"                             "\r\n"\
+        "push %r8"                              "\r\n"\
+        "push %r9"                              "\r\n"\
         "push %r10"                             "\r\n"\
         "push %r11"                             "\r\n"\
-        "mov 56(%rsp), %rdi"                    "\r\n"\
+        "mov 72(%rsp), %rdi"                    "\r\n"\
 \
         "call " #func_                          "\r\n"\
 \
         "pop %r11"                              "\r\n"\
         "pop %r10"                              "\r\n"\
+        "pop %r9"                               "\r\n"\
+        "pop %r8"                               "\r\n"\
         "pop %rcx"                              "\r\n"\
         "pop %rdx"                              "\r\n"\
         "pop %rsi"                              "\r\n"\
