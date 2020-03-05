@@ -86,7 +86,7 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             uint8_t c = arg1;
 
             static bool fmt_mode = 0;
-            static char fmt_buf[16];
+            static char fmt_buf[50];
             static size_t fmt_used;
 
             if (!fmt_mode) {
