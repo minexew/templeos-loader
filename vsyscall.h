@@ -32,6 +32,6 @@ struct CHostFsStat {
     char*       name;
 };
 
-int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg3);
+int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg3, int64_t arg4);
 
 #endif

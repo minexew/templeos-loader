@@ -1,3 +1,5 @@
+#ifndef TEMPLEOS_H
+#define TEMPLEOS_H
 
 #include <stdint.h>
 
@@ -77,3 +79,5 @@ struct CHashTable10 {
 #define RS_ATTR_COMPRESSED      0x400 //Z
 #define RS_ATTR_CONTIGUOUS      0x800 //C
 #define RS_ATTR_FIXED           0x1000 //F
+
+#endif

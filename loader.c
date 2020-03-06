@@ -101,8 +101,8 @@ int main(int argc, char** argv) {
 	//printf("pid: %d\n", getpid());
     //printf("pc: %p\n", get_pc());
 
-    if (argc != 4) {
-        fprintf(stderr, "usage: templeos-loader <kernel> <rootfs> <writable>\n");
+    if (argc != 6) {
+        fprintf(stderr, "usage: templeos-loader <kernel> <rootfs> <rootfs writable> <vfs> <vfs writable>\n");
         exit(-1);
     }
 
@@ -111,8 +111,10 @@ int main(int argc, char** argv) {
         exit(-1);
 
 	/* load kernel image */
-    if (load_kernel(argv[1], (void*) KERNEL_START, KERNEL_END - KERNEL_START) < 0)
+    if (load_kernel(argv[1], (void*) KERNEL_START, KERNEL_END - KERNEL_START) < 0) {
+        fprintf(stderr, "failed to load kernel %s\n", argv[1]);
         exit(-1);
+    }
 
 	/* locate entry point */
     struct sym* KMain_sym = findsym("VKMain");
@@ -127,8 +129,11 @@ int main(int argc, char** argv) {
         exit(-1);
     }
 
-    /* VFS init */
-    vfs_init(argv[0], argv[2], argv[3]);
+    /* ROOTFS init (Temple OS drive C) */
+    vfs_init(argv[0], argv[2], argv[3], 0);
+
+    /* VFS init (Temple OS drive D) */
+    vfs_init(argv[0], argv[4], argv[5], 1);
 
     /* install trap handler */
     struct sigaction sa = { };

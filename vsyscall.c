@@ -26,7 +26,7 @@ long arch_prctl(int, unsigned long);
 //#define trace_syscall(args) printf args
 #define trace_syscall(args) do {} while(0)
 
-int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg3) {
+int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg3, int64_t arg4) {
     switch (num) {
         case VSYSCALL_ADDSYM: {
             const char* module = (const char*) arg1;
@@ -39,9 +39,10 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
         }
         case VSYSCALL_CLOSEDIR: {
             struct vfs_dir_t* dirp = (struct vfs_dir_t*) arg1;
+            unsigned char dv = arg2;
 
-            trace_syscall(("VSYSCALL_CLOSEDIR(%p)\n", dirp));
-            return vfs_closedir(dirp);
+            trace_syscall(("VSYSCALL_CLOSEDIR(%p, %d)\n", dirp, dv));
+            return vfs_closedir(dirp, dv);
         }
         case VSYSCALL_DEBUG: {
             printf("[DEBUG] %s\t%d\t%08X\n", (const char*) arg1, arg2, arg2);
@@ -54,17 +55,19 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             const char* path = (const char*) arg1;
             uint8_t* buf = (uint8_t*) arg2;
             size_t bufsiz = (size_t) arg3;
-            trace_syscall(("VSYSCALL_FGET(%s, %p, %d)\n", path, buf, bufsiz));
+            unsigned char dv = arg4;
+            trace_syscall(("VSYSCALL_FGET(%s, %p, %d, %d)\n", path, buf, bufsiz, dv));
 
-            return vfs_fget(path, buf, bufsiz);
+            return vfs_fget(path, buf, bufsiz, dv);
         }
         case VSYSCALL_FPUT: {
             const char* path = (const char*) arg1;
             const uint8_t* buf = (const uint8_t*) arg2;
             size_t bufsiz = (size_t) arg3;
-            trace_syscall(("VSYSCALL_FPUT(%s, %p, %d)\n", path, buf, bufsiz));
+            unsigned char dv = arg4;
+            trace_syscall(("VSYSCALL_FPUT(%s, %p, %d, %d)\n", path, buf, bufsiz, dv));
 
-            return vfs_fput(path, buf, bufsiz);
+            return vfs_fput(path, buf, bufsiz, dv);
         }
         case VSYSCALL_MEMSIZE: {
             trace_syscall(("VSYSCALL_MEMSIZE\n"));
@@ -72,15 +75,16 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
         }
         case VSYSCALL_MKDIR: {
             const char* path = (const char*) arg1;
+            unsigned char dv = arg2;
 
-            trace_syscall(("VSYSCALL_MKDIR(%s)\n", path));
-            return vfs_mkdir(path);
+            trace_syscall(("VSYSCALL_MKDIR(%s,%d)\n", path, dv));
+            return vfs_mkdir(path, dv);
         }
         case VSYSCALL_OPENDIR: {
             const char* path = (const char*) arg1;
-
-            trace_syscall(("VSYSCALL_OPENDIR(%s)\n", path));
-            return (int64_t) vfs_opendir(path);
+            unsigned char dv = arg2;
+            trace_syscall(("VSYSCALL_OPENDIR(%s, %d)\n", path, dv));
+            return (int64_t) vfs_opendir(path, dv);
         }
         case VSYSCALL_PUTCHAR: {
             uint8_t c = arg1;
@@ -129,9 +133,10 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
         case VSYSCALL_READDIR: {
             struct vfs_dir_t* dirp = (struct vfs_dir_t*) arg1;
             struct CHostFsStat* st_out = (struct CHostFsStat*) arg2;
+            unsigned char dv = arg3;
 
-            trace_syscall(("VSYSCALL_READDIR(%p, %p)\n", dirp, st_out));
-            return vfs_readdir(dirp, st_out);
+            trace_syscall(("VSYSCALL_READDIR(%p, %p, %d)\n", dirp, st_out, dv));
+            return vfs_readdir(dirp, st_out, dv);
         }
         case VSYSCALL_SETFS: {
             int rc = arch_prctl(ARCH_SET_FS, arg1);
@@ -146,26 +151,29 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
         case VSYSCALL_STATCLUS: {
             clus_t clus = arg1;
             struct CHostFsStat* st_out = (struct CHostFsStat*) arg2;
-            trace_syscall(("VSYSCALL_STATCLUS(%d, %p)\n", (int) clus, st_out));
+            unsigned char dv = arg3;
+            trace_syscall(("VSYSCALL_STATCLUS(%d, %p, %d)\n", (int) clus, st_out, dv));
 
-            int rc = vfs_statclus(clus, st_out);
+            int rc = vfs_statclus(clus, st_out, dv);
             trace_syscall((" -> %d\n", rc));
             return rc;
         }
         case VSYSCALL_STAT: {
             const char* path = (const char*) arg1;
             struct CHostFsStat* st_out = (struct CHostFsStat*) arg2;
-            trace_syscall(("VSYSCALL_STAT(%s, %p)\n", path, st_out));
-
-            int rc = vfs_stat(path, st_out);
+            unsigned char dv = arg3;
+            trace_syscall(("VSYSCALL_STAT(%s, %p, %d)\n", path, st_out, dv));
+            int rc = -1;
+            rc = vfs_stat(path, st_out, dv);
             trace_syscall((" -> %d\n", rc));
             return rc;
         }
         case VSYSCALL_UNLINK: {
             const char* path = (const char*) arg1;
+            unsigned char dv = arg2;
 
-            trace_syscall(("VSYSCALL_UNLINK(%s)\n", path));
-            return vfs_unlink(path);
+            trace_syscall(("VSYSCALL_UNLINK(%s, %d)\n", path, dv));
+            return vfs_unlink(path, dv);
         }
         case VSYSCALL_USLEEP: {
             trace_syscall(("VSYSCALL_USLEEP(%d)\n", arg1));
