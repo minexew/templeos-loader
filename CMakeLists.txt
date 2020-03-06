@@ -4,6 +4,8 @@ project("templeos-loader")
 find_package(PhysFS REQUIRED)
 
 add_executable("templeos-loader"
+        hfs.h
+        hfs.c
         host.c
         host.h
         loader.c

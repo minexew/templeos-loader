@@ -1,6 +1,7 @@
 #include "memory_map.h"
 #include "symtable.h"
 #include "templeos.h"
+#include "hfs.h"
 #include "vfs.h"
 #include "vsyscall.h"
 
@@ -56,7 +57,21 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             size_t bufsiz = (size_t) arg3;
             trace_syscall(("VSYSCALL_FGET(%s, %p, %d)\n", path, buf, bufsiz));
 
-            return vfs_fget(path, buf, bufsiz);
+            // case where current directory is not prepended
+            if (path[0] == HFS_ESC_PATH_START(HFS_ESC_CHAR)) {
+                return hfs_fget(path+1, buf, bufsiz);
+            }
+            else {
+                char *result = strstr(path, HFS_ESC_PATH_SEARCH(HFS_ESC_CHAR));
+                if (result) {
+                    // case where current directory is prepended
+                    return hfs_fget(result+2, buf, bufsiz);
+                }
+                else {
+                    // normal VFS case
+                    return vfs_fget(path, buf, bufsiz);
+                }
+            }
         }
         case VSYSCALL_FPUT: {
             const char* path = (const char*) arg1;
@@ -78,7 +93,6 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
         }
         case VSYSCALL_OPENDIR: {
             const char* path = (const char*) arg1;
-
             trace_syscall(("VSYSCALL_OPENDIR(%s)\n", path));
             return (int64_t) vfs_opendir(path);
         }
@@ -156,8 +170,22 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             const char* path = (const char*) arg1;
             struct CHostFsStat* st_out = (struct CHostFsStat*) arg2;
             trace_syscall(("VSYSCALL_STAT(%s, %p)\n", path, st_out));
-
-            int rc = vfs_stat(path, st_out);
+            int rc = -1;
+            // case where current directory is not prepended
+            if (path[0] == HFS_ESC_PATH_START(HFS_ESC_CHAR)) {
+                rc = hfs_stat(path+1, st_out);
+            }
+            else {
+                char *result = strstr(path, HFS_ESC_PATH_SEARCH(HFS_ESC_CHAR));
+                if (result) {
+                    // case where current directory is prepended
+                    rc = hfs_stat(result+2, st_out);
+                }
+                else {
+                    // normal VFS case
+                    rc = vfs_stat(path, st_out);
+                }
+            }
             trace_syscall((" -> %d\n", rc));
             return rc;
         }
