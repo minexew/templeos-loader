@@ -43,17 +43,19 @@ One advantage of the described approach is that the resulting binary is linked s
     # checkout shrine-v6 branch VKernel
     cd $SHRINEV6_DIR
 
-    # bootstrap the necessary binaries
-    mkdir -p Writable/Compiler Writable/Kernel
-    cp $LOADER_DIR/bootstrap/Compiler.BIN Writable/Compiler/
-    cp $LOADER_DIR/bootstrap/VKernel.BIN VKernel-good.BIN
-
     # Recompile the kernel (example)
-    # templeos-loader <vkernel> <rootfs> <rw-overlay>
-    env STARTOS=CompileKernel.HC $LOADER_DIR/build/templeos-loader VKernel-good.BIN . Writable
+    # templeos-loader <vkernel> <C:/> <C:/ writable> <D:/> <D:/ writable>
+    mkdir -p Writable/Compiler Writable/Kernel
+    env COMPILER=D:/Compiler STARTOS=CompileKernel.HC $LOADER_DIR/build/templeos-loader \
+        $LOADER_DIR/bootstrap/VKernel.BIN \
+        . Writable \
+        $LOADER_DIR/bootstrap /dev/null
 
-    # now test that newly compiled kernel works as expected
-    env STARTOS=CompileKernel.HC $LOADER_DIR/build/templeos-loader Writable/Kernel/VKernel.BIN.C . Writable
+    # now do the same, but using the newly compiled kernel to verify that it works
+    env COMPILER=D:/Compiler STARTOS=CompileKernel.HC $LOADER_DIR/build/templeos-loader \
+        Writable/Kernel/VKernel.BIN.C \
+        . Writable \
+        $LOADER_DIR/bootstrap /dev/null
 
 ### Building TempleOS ISO from source
 
@@ -80,7 +82,7 @@ loader is actually agnostic to these, but for now we document them here:
 - `COMPILER` (default _Compiler_) - compiler binary path relative to /Compiler/
 - `STARTOS` (default _StartOS_) - StartOS.HC path relative to /
 
-Note that these paths are constrained to the virtualized rootfs!
+Note that these files must be accessible through one of the virtualized drives!
 
 # TODO
 
