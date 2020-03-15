@@ -4,6 +4,7 @@
 #include "templeos.h"
 
 #include <fcntl.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,9 +16,9 @@ void LoadOneImport(size_t module_base, uint8_t** _src) {
     uint8_t *src = *_src;
     uint8_t etype;
 
-    //CHashExport *tmpex=NULL;
+    uintptr_t func_addr = 0;
     //CHashImport *tmpiss;
-    int first = 1;
+    bool first = true;
 
     while ((etype = *src++) != IET_END) {
         uintptr_t i = 0;
@@ -32,23 +33,14 @@ void LoadOneImport(size_t module_base, uint8_t** _src) {
                 return;
             }
             else {
-                first = 0;
-                //if (!(tmpex=HashFind(st_ptr, Fs->hash_table, HTG_ALL - HTT_IMPORT_SYS_SYM))) {
-                    //if (!(ld_flags & LDF_SILENT))
-                    //    fprintf(stderr, "Unresolved Reference:%s\n", name);
-                    /*tmpiss=CAlloc(sizeof(CHashImport));
-                    tmpiss->str=StrNew(st_ptr);
-                    tmpiss->type=HTT_IMPORT_SYS_SYM;
-                    tmpiss->module_header_entry=st_ptr-5;
-                    tmpiss->module_base=module_base;
-                    HashAdd(tmpiss,Fs->hash_table);*/
-                //}
+                first = false;
+                // resolve only Host API calls, the kernel itself will take care of the rest later
+                func_addr = (uintptr_t) host_get_API_by_name(name);
             }
         }
 
-        // resolve Host API calls
         uintptr_t ptr2=module_base+i;
-        i = (uintptr_t) host_get_API_by_name(name);
+        i = func_addr;
 
         if (!i) {
             continue;
