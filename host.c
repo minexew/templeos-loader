@@ -19,7 +19,7 @@ static const char* HostGetEnv(const char* name) {
 
 // Generate thunks for translating TempleOS ABI to SysV
 
-MAKE_THUNK1(HostGetApiVersion)
+MAKE_THUNK0(HostGetApiVersion)
 MAKE_THUNK1(HostGetEnv)
 
 // Functions are currently exported as __host_GetEnv etc.,
