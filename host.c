@@ -6,14 +6,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-static uint32_t HostGetApiVersion(void) {
+__attribute__((used)) static uint32_t HostGetApiVersion(void) {
     // 0xMMMMmmmm
     // MAJOR = breaking changes
     // minor = backwards-compatible changes
     return 0x00010000;
 }
 
-static const char* HostGetEnv(const char* name) {
+__attribute__((used)) static const char* HostGetEnv(const char* name) {
     return getenv(name);
 }
 

@@ -9,7 +9,7 @@
 
 #define MAKE_THUNK0(func_)\
 __attribute__((naked)) static void thunk_##func_() {\
-    __asm__(\
+    asm(\
         "push %rdi"                             "\r\n"\
         "push %rsi"                             "\r\n"\
         "push %rdx"                             "\r\n"\
@@ -36,7 +36,7 @@ __attribute__((naked)) static void thunk_##func_() {\
 
 #define MAKE_THUNK1(func_)\
 __attribute__((naked)) static void thunk_##func_() {\
-    __asm__(\
+    asm(\
         "push %rdi"                             "\r\n"\
         "push %rsi"                             "\r\n"\
         "push %rdx"                             "\r\n"\
