@@ -18,22 +18,23 @@ For this reason, to avoid crashing, you must use a libc that is more "accomodati
 
     git clone git://git.musl-libc.org/musl musl-src
     cd musl-src
-    ./configure --prefix=~/musl --disable-shared
+    ./configure --prefix=$PWD/../build/musl --disable-shared
     make install
     cd ..
+    set PATH $PWD/build/musl/bin $PATH    # if you use a different shell than fish, the syntax will be diferent
 
 ### Build PhysFS
 
     git submodule update --init --recursive
     cd physfslt-3.0.2
-    env CC=musl-gcc cmake -DCMAKE_INSTALL_PREFIX:PATH=~/physfs -DPHYSFS_BUILD_SHARED=OFF . && make install
+    env CC=musl-gcc cmake -DCMAKE_INSTALL_PREFIX:PATH=$PWD/../build/physfs -DPHYSFS_BUILD_SHARED=OFF . && make install
     cd ..
 
 ### Build templeos-loader
 
     mkdir cmake-build-debug
     cd cmake-build-debug
-    env CC=musl-gcc PHYSFSDIR=~/physfs/ cmake ..
+    env CC=musl-gcc PHYSFSDIR=$PWD/../build/physfs/ cmake ..
     cmake --build .
 
 One advantage of the described approach is that the resulting binary is linked statically and thus portable to any x86-64 Linux system
