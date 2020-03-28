@@ -65,9 +65,14 @@ __attribute__((noreturn)) static void bugcheck(ucontext_t* u) {
 void handler(int code, siginfo_t *info, void *ctx) {
 	ucontext_t *u = (ucontext_t *)ctx;
 
-    /*if (code == SIGILL) {
+    if (code == SIGFPE) {
+        uint64_t rip = REG_GET(REG_RIP);
+
+        fprintf(stderr, "TRAP FPE: rip=%p fp_ctrl=%04Xh fp_stat=%04Xh\n",
+                (void*) rip, u->uc_mcontext.fpregs->cwd, u->uc_mcontext.fpregs->swd);
+        bugcheck(u);
     }
-	else */if (code == SIGSEGV) {
+	else if (code == SIGSEGV) {
         void *addr = info->si_addr;
         int err = u->uc_mcontext.gregs[REG_ERR];
         int is_write = !!(err & 0x2);
