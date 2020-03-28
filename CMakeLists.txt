@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.1)
 project("templeos-loader")
 
+add_subdirectory(argtable3)
+
 find_package(PhysFS REQUIRED)
 
 add_executable("templeos-loader"
@@ -21,5 +23,5 @@ add_executable("templeos-loader"
         vfs.c
         )
 
-target_include_directories("templeos-loader" PRIVATE ${PHYSFS_INCLUDE_DIR})
-target_link_libraries("templeos-loader" PRIVATE ${PHYSFS_LIBRARY} -static)
+target_include_directories("templeos-loader" PRIVATE ${PROJECT_SOURCE_DIR}/argtable3/src ${PHYSFS_INCLUDE_DIR})
+target_link_libraries("templeos-loader" PRIVATE argtable3_static ${PHYSFS_LIBRARY} -static)

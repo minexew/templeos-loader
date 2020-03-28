@@ -35,7 +35,7 @@ For this reason, to avoid crashing, you must use a libc that is more "accomodati
     mkdir cmake-build-debug
     cd cmake-build-debug
     env CC=musl-gcc PHYSFSDIR=$PWD/../build/physfs/ cmake ..
-    cmake --build .
+    cmake --build . --target templeos-loader
 
 One advantage of the described approach is that the resulting binary is linked statically and thus portable to any x86-64 Linux system
 
@@ -46,17 +46,17 @@ One advantage of the described approach is that the resulting binary is linked s
 
     # Recompile the kernel (example)
     # templeos-loader <vkernel> <C:/> <C:/ writable> <D:/> <D:/ writable>
-    mkdir -p Writable/Compiler Writable/Kernel
+    mkdir -p User/Compiler User/Kernel
     env COMPILER=D:/Compiler STARTOS=CompileKernel.HC $LOADER_DIR/build/templeos-loader \
         $LOADER_DIR/bootstrap/VKernel.BIN \
-        . Writable \
-        $LOADER_DIR/bootstrap /dev/null
+        --drive=C,.,User \
+        --drive=D,$LOADER_DIR/bootstrap
 
     # now do the same, but using the newly compiled kernel to verify that it works
     env COMPILER=D:/Compiler STARTOS=CompileKernel.HC $LOADER_DIR/build/templeos-loader \
-        Writable/Kernel/VKernel.BIN.C \
-        . Writable \
-        $LOADER_DIR/bootstrap /dev/null
+        User/Kernel/VKernel.BIN.C \
+        --drive=C,.,User \
+        --drive=D,$LOADER_DIR/bootstrap
 
 ### Building TempleOS ISO from source
 
@@ -65,16 +65,16 @@ One advantage of the described approach is that the resulting binary is linked s
     cd TempleOS
 
     # bootstrap the necessary programs
-    mkdir -p Writable/Compiler Writable/Kernel
-    cp $LOADER_DIR/bootstrap/Compiler.BIN Writable/Compiler/
+    mkdir -p User/Compiler User/Kernel
+    cp $LOADER_DIR/bootstrap/Compiler.BIN User/Compiler/
     cp $LOADER_DIR/bootstrap/VKernel.BIN VKernel-good.BIN
-    cp $LOADER_DIR/examples/StartDoDistro.HC Writable/
+    cp $LOADER_DIR/examples/StartDoDistro.HC User/
 
     # build it!
-    env STARTOS=StartDoDistro $LOADER_DIR/build/templeos-loader VKernel-good.BIN . Writable
+    env STARTOS=StartDoDistro $LOADER_DIR/build/templeos-loader VKernel-good.BIN --drive=C,.,User
 
     # look at the result
-    ls -l Writable/Tmp/MyDistro.ISO.C
+    ls -l User/Tmp/MyDistro.ISO.C
 
 ## Environment variables
 

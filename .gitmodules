@@ -1,3 +1,6 @@
+[submodule "argtable3"]
+	path = argtable3
+	url = https://github.com/argtable/argtable3
 [submodule "physfslt-3.0.2"]
 	path = physfslt-3.0.2
 	url = https://github.com/ljward10/physfslt-3.0.2.git

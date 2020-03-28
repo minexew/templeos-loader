@@ -57,11 +57,17 @@ void vfs_init(const char* argv0, const char* vfspath, const char* writepath, con
     // TODO: handle errors
     printf("Init dv = %d\n",dv);
     PHYSFS_init(argv0, dv);
-    PHYSFS_setWriteDir(writepath, dv);
 
-    // "The write dir is not included in the search path unless you specifically add it."
-    PHYSFS_mount(writepath, "/", 1, dv);
-    PHYSFS_mount(vfspath, "/", 1, dv);
+    if (writepath) {
+        PHYSFS_setWriteDir(writepath, dv);
+
+        // "The write dir is not included in the search path unless you specifically add it."
+        PHYSFS_mount(writepath, "/", 1, dv);
+    }
+
+    if (vfspath) {
+        PHYSFS_mount(vfspath, "/", 1, dv);
+    }
 }
 
 int vfs_closedir(struct vfs_dir_t* dirp, const unsigned char dv) {
