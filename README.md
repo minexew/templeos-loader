@@ -21,7 +21,7 @@ For this reason, to avoid crashing, you must use a libc that is more "accomodati
     ./configure --prefix=$PWD/../build/musl --disable-shared
     make install
     cd ..
-    set PATH $PWD/build/musl/bin $PATH    # if you use a different shell than fish, the syntax will be diferent
+    export PATH=$PWD/build/musl/bin:$PATH
 
 ### Build PhysFS
 
