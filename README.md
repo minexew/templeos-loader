@@ -85,6 +85,10 @@ loader is actually agnostic to these, but for now we document them here:
 
 Note that these files must be accessible through one of the virtualized drives!
 
+## Other tips
+
+- To not break into GDB every time a SEGV is trapped (e.g. when encountering an unpatched CLI instruction), use the GDB command `handle SIGSEGV nostop`
+
 # TODO
 
 - Proper commandline parsing

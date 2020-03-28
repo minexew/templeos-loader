@@ -79,8 +79,10 @@ void handler(int code, siginfo_t *info, void *ctx) {
 
         uint64_t rip = REG_GET(REG_RIP);
 
+        enum { X86_CLI = 0xFA };
+
         // Neutralized in kernel via #define in VKernel.HH, but may show up in Adam + apps
-        if (rip >= KERNEL_START && rip < FLAT_START + FLAT_SIZE && *(uint8_t*) rip == 0xFA) {
+        if (rip >= KERNEL_START && rip < FLAT_START + FLAT_SIZE && *(uint8_t*) rip == X86_CLI) {
             //  hangs in libc :(
             // probably because we fuck with the memory so much
             //fprintf(stderr, "NOTE: patching out CLI instruction (opcode %02Xh) @ %p\n", *(uint8_t*) rip, rip);
