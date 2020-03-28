@@ -17,5 +17,8 @@ jobs:
     steps:
       - uses: actions/checkout@v1
 
+      - name: Update Submodules
+        run: git submodule update --init --recursive
+
       - name: Build
         run: .github/ci-build.sh
