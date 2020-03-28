@@ -15,6 +15,8 @@
 //if not musl:
 //#include <asm/prctl.h>
 #include <sys/prctl.h>
+#include <sys/select.h>
+
 #ifndef ARCH_SET_GS
 #define ARCH_SET_GS             0x1001
 #endif
@@ -128,7 +130,22 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             size_t nbytes = (size_t) arg3;
 
             trace_syscall(("VSYSCALL_READ(%d, %p, %zu)\n", fd, buf, nbytes));
-            return read(0, buf, nbytes);
+
+            fd_set fds;
+            FD_ZERO(&fds);
+            FD_SET(0, &fds);
+
+            struct timeval immediate = { .tv_sec = 0, .tv_usec = 100000 };
+
+            if (select(1, &fds, NULL, NULL, &immediate)){
+                fprintf(stderr, "Got input?\n");
+                // As usual, it is more complicated (TASKf_AWAITING_MSG...)
+                return read(0, buf, nbytes);
+            }
+            else {
+                fprintf(stderr, "N\n");
+                return 0;
+            }
         }
         case VSYSCALL_READDIR: {
             struct vfs_dir_t* dirp = (struct vfs_dir_t*) arg1;
