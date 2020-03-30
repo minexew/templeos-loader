@@ -93,14 +93,10 @@ Note that these files must be accessible through one of the virtualized drives!
 
 # TODO
 
-- Proper commandline parsing
 - bug: PhysFS will not create necessary directories that exist in RO but not in RW overlay!!
 - implement fopen, fread, fwrite as syscalls
-- Implement date & time syscalls
-- Return date & time in HostFsStat_t
 - basedir() call is questionable
 - Clean up syscalls
-- Fix CI -- needs to also use musl libc
 
 # Design details
 
