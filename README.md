@@ -11,6 +11,8 @@ However, the primary goal is not "to bring HolyC to Linux". The TempleOS program
 
 ## Building
 
+GCC 8+ is required for `__attribute__((naked))`.
+
 glibc definitely does not appreciate the way we handle memory.
 For this reason, to avoid crashing, you must use a libc that is more "accomodating", such as musl
 
