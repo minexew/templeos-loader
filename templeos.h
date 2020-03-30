@@ -39,6 +39,12 @@ struct CBinFile {
                 file_size;
 };
 
+struct CDateStruct {
+    uint8_t     sec10000,sec100,sec,min,hour,
+                day_of_week,day_of_mon,mon;
+    int32_t     year;
+};
+
 struct CHash
 {//See $LK,"Hash",A="HI:Hash"$
     struct CHash	*next;

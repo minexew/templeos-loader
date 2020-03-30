@@ -6,6 +6,8 @@ add_subdirectory(argtable3)
 find_package(PhysFS REQUIRED)
 
 add_executable("templeos-loader"
+        datetime.c
+        datetime.h
         host.c
         host.h
         loader.c

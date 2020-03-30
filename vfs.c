@@ -1,3 +1,4 @@
+#include "datetime.h"
 #include "templeos.h"
 #include "vfs.h"
 
@@ -163,6 +164,7 @@ int vfs_stat(const char* path, struct CHostFsStat* st_out, const unsigned char d
     st_out->clus = assignment->clus;
     st_out->abs_path = assignment->path;
     st_out->name = basename(st_out->abs_path);
+    timespec_to_CDateStruct_local(st.modtime, 0, &st_out->datetime);
 
     return 0;
 }
@@ -187,6 +189,7 @@ int vfs_statclus(clus_t clus, struct CHostFsStat* st_out, const unsigned char dv
     st_out->size = st.filesize;
     st_out->clus = assignment->clus;
     st_out->abs_path = assignment->path;
+    timespec_to_CDateStruct_local(st.modtime, 0, &st_out->datetime);
 
     return 0;
 }

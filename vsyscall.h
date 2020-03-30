@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include "templeos.h"
+
 enum {
     VSYSCALL_DEBUG =        0,
     VSYSCALL_MEMSIZE =      1,
@@ -30,6 +32,7 @@ struct CHostFsStat {
     int64_t     clus, size;
     char*       abs_path;
     char*       name;
+    struct CDateStruct datetime;
 };
 
 int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg3, int64_t arg4);
