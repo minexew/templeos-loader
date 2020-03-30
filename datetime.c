@@ -1,5 +1,8 @@
 #include "datetime.h"
 
+#include <string.h>
+#include <time.h>
+
 void timespec_to_CDateStruct_local(time_t tv_sec, long tv_nsec, struct CDateStruct* ds_out) {
     struct tm tm;
     if (!localtime_r(&tv_sec, &tm)) {
@@ -17,6 +20,6 @@ void timespec_to_CDateStruct_local(time_t tv_sec, long tv_nsec, struct CDateStru
     ds_out->hour = tm.tm_hour;
     ds_out->day_of_week = tm.tm_wday;       // correct?
     ds_out->day_of_mon = tm.tm_mday;        // correct?
-    ds_out->mon = tm.tm_mon;
-    ds_out->year = tm.tm_year;
+    ds_out->mon = 1 + tm.tm_mon;
+    ds_out->year = 1900 + tm.tm_year;
 }
