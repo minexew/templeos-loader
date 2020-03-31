@@ -11,7 +11,7 @@ __attribute__((used)) static uint32_t HostGetApiVersion(void) {
     // 0xMMMMmmmm
     // MAJOR = breaking changes
     // minor = backwards-compatible changes
-    return 0x00020000;
+    return 0x00030000;
 }
 
 __attribute__((used)) static const char* HostGetEnv(const char* name) {
@@ -30,16 +30,15 @@ MAKE_THUNK0(HostGetApiVersion)
 MAKE_THUNK1(HostGetEnv)
 MAKE_THUNK1(HostGetLocalTime)
 
-// Functions are currently exported as __host_GetEnv etc.,
-// at least until we figure out if we can directly re-export kernel-imported symbols for JIT
-#define ENTRY(name_) else if (!strcmp(name, "__host_" #name_)) { return (void*) &thunk_Host##name_; }
+// Functions are exported as HostGetEnv etc.
+#define ENTRY(name_) else if (!strcmp(name, #name_)) { return (void*) &thunk_##name_; }
 
-// TODO: tabularize this
+// TODO: tabularize this, it will be needed for HostGetApiFunctions anyway
 void* host_get_API_by_name(const char* name) {
     if (0) {}
-    ENTRY(GetApiVersion)
-    ENTRY(GetEnv)
-    ENTRY(GetLocalTime)
+    ENTRY(HostGetApiVersion)
+    ENTRY(HostGetEnv)
+    ENTRY(HostGetLocalTime)
 
     return 0;
 }
