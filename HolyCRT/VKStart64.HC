@@ -22,10 +22,7 @@ IMPORT SYS_RUN_LEVEL;*/
 
 XOR RDI, RDI
 XOR RSI, RSI
- //MOV EDI, U32 [MEM_HEAP_BASE]
-// workaround compiler bug
-MOV RSI, 0x109240
- MOV EDI, U32 [RSI]
+ MOV EDI, U32 [MEM_HEAP_BASE]
 
   MOV ESI,SYS_FIXED_AREA+CSysFixedArea.sys_code_bp
 
