@@ -19,3 +19,9 @@ jobs:
 
       - name: Build
         run: .github/ci-build.sh
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v1
+        with:
+          name: templeos-loader
+          path: cmake-build-debug/templeos-loader

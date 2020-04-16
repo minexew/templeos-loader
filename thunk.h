@@ -8,8 +8,9 @@
 // "mov 96(%rsp), %r9"                     "\r\n"
 
 #define MAKE_THUNK0(func_)\
-__attribute__((naked)) static void thunk_##func_() {\
+void thunk_##func_();\
     asm(\
+    "thunk_" #func_ ":"                         "\r\n"\
         "push %rdi"                             "\r\n"\
         "push %rsi"                             "\r\n"\
         "push %rdx"                             "\r\n"\
@@ -31,12 +32,12 @@ __attribute__((naked)) static void thunk_##func_() {\
         "pop %rdi"                              "\r\n"\
 \
         "retq"                                  "\r\n"\
-    );\
-}
+    );
 
 #define MAKE_THUNK1(func_)\
-__attribute__((naked)) static void thunk_##func_() {\
+void thunk_##func_();\
     asm(\
+    "thunk_" #func_ ":"                         "\r\n"\
         "push %rdi"                             "\r\n"\
         "push %rsi"                             "\r\n"\
         "push %rdx"                             "\r\n"\
@@ -59,7 +60,6 @@ __attribute__((naked)) static void thunk_##func_() {\
         "pop %rdi"                              "\r\n"\
 \
         "retq $8"                               "\r\n"\
-    );\
-}
+    );
 
 #endif

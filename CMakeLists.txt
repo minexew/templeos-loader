@@ -26,6 +26,9 @@ add_library("libtempleos-loader"
         vfs.c
         )
 
+# HolyC code doesn't exactly follow GCC's expectations...
+target_compile_options("libtempleos-loader" PUBLIC -fno-stack-protector)
+
 target_include_directories("libtempleos-loader" PRIVATE ${PHYSFS_INCLUDE_DIR})
 target_include_directories("libtempleos-loader" PUBLIC ${PROJECT_SOURCE_DIR})
 target_link_libraries("libtempleos-loader" PRIVATE ${PHYSFS_LIBRARY})
