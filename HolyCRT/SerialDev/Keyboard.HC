@@ -85,6 +85,7 @@ U0 KbdMsCmdAck(...)
 
 U0 KbdTypeMatic(U8 delay)
 {//Set speed of repeated keys.
+  no_warn delay;
   /* VKernel NO-OP
   try {
     KbdCmdSend(KBD_CTRL,0xA7); //Disable Mouse

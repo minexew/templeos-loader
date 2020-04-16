@@ -24,10 +24,9 @@ U8* HostFsMakeAbsPath(U8* dir, U8* name) {
 Bool HostFsFileFind(CDrv *dv,I64 cur_dir_clus,U8 *name,
         CDirEntry *_res,I64 fuf_flags=0)
 {//$LK,"FUF_JUST_DIRS",A="MN:FUF_JUST_DIRS"$, $LK,"FUF_JUST_FILES",A="MN:FUF_JUST_FILES"$
-  CDirEntry *abs_path,*buf2,*ptr;
+  CDirEntry *abs_path;
   U8 dname[CDIR_FILENAME_LEN];
-  I64 ch;
-  Bool res=FALSE,unlock;
+  Bool res=FALSE;
   if (fuf_flags&~FUG_FILE_FIND)
     throw('FUF');
   MemSet(_res,0,sizeof(CDirEntry));
@@ -79,8 +78,7 @@ Bool HostFsFileFind(CDrv *dv,I64 cur_dir_clus,U8 *name,
 U8 *HostFsFileRead(CDrv *dv,U8 *cur_dir,U8 *filename,I64 *_size,I64 *_attr)
 {
   U8 *buf=NULL, *path=NULL;
-  CDirEntry de;
-  I64 c,blk_cnt,cur_dir_clus;
+
   DrvChk(dv);
   *_size=0;
   *_attr=0;
@@ -124,6 +122,8 @@ Bool HostFsCd(U8 *name,I64 cur_dir_clus)
 I64 HostFsFilesDel(CDrv *dv,U8 *cur_dir,U8 *files_find_mask,I64 fuf_flags,
                      Bool del_dir,Bool print_msg)
 {
+  no_warn cur_dir; // TODO: shouldn't we be using this?
+
   I64 res=0,ch, dirp;
 
   dirp = VSysCall(VSYSCALL_OPENDIR, Fs->cur_dir, dv->prt_num, 0, 0);
@@ -151,9 +151,14 @@ I64 HostFsFilesDel(CDrv *dv,U8 *cur_dir,U8 *files_find_mask,I64 fuf_flags,
 I64 HostFsFileWrite(CDrv *dv,U8 *cur_dir,U8 *name,U8 *buf,I64 size,
         CDate cdt,I64 attr)
 {
+  no_warn cdt;    // TODO?
+  no_warn attr;   // TODO?
+
   CDirEntry de;
-  I64 c=0,blk_cnt;
+  I64 c=0;
+
   MemSet(&de,0,sizeof(CDirEntry));
+
   if (size<0) size=0;
   if (dv->fs_type!=FSt_HOSTFS)
     PrintErr("Not HostFS Drv\n");
@@ -177,8 +182,8 @@ CDirEntry *HostFsFilesFind(U8 *files_find_mask,I64 fuf_flags,
         CDirEntry *parent=NULL)
 {
   CDrv *dv=Fs->cur_dv;
-  CDirEntry *buf,*buf2,*ptr,*res=NULL,*tmpde;
-  I64 cur_dir_clus, dirp;
+  CDirEntry *res=NULL,*tmpde;
+  I64 dirp;
   if (fuf_flags&~FUG_FILES_FIND)
     throw('FUF');
 
@@ -229,8 +234,10 @@ CDirEntry *HostFsFilesFind(U8 *files_find_mask,I64 fuf_flags,
 
 Bool HostFsMkDir(CDrv *dv,U8 *cur_dir,U8 *name,I64 entry_cnt)
 {
+  no_warn entry_cnt;
+
   U8* abs_path = HostFsMakeAbsPath(cur_dir, name);
-  Bool ok = (VSysCall(VSYSCALL_MKDIR, abs_path, dv->prt_num, 0, 0) == 0);
+  Bool ok = VSysCall(VSYSCALL_MKDIR, abs_path, dv->prt_num, 0, 0) == 0;
   Free(abs_path);
   return ok;
 }

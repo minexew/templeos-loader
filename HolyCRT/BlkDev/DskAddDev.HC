@@ -232,7 +232,6 @@ Bool GetBaseUnit(CBlkDev *bd)
 
 U0 BlkDevsInitAll()
 {
-  CBlkDev *bd;
   I64 i;
   blkdev.blkdevs=CAlloc(sizeof(CBlkDev)*BLKDEVS_NUM);
   blkdev.drvs=CAlloc(sizeof(CDrv)*DRVS_NUM);

@@ -640,6 +640,7 @@ U0 Fault2(I64 fault_num,I64 fault_err_code)
 
 U0 Panic(U8 *msg=NULL,I64 msg_num=0,Bool panic=TRUE)
 {//Enter the debugger with panic?
+  no_warn panic;
   Raw(ON);
   "Panic: %s / %08X\n", msg, msg_num;
   INT I_DBG

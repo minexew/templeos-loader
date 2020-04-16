@@ -162,6 +162,9 @@ Bool ATAPIStartStop(CBlkDev *bd,F64 timeout,Bool start)
 
 I64 ATAGetDevId(CBlkDev *bd,F64 timeout,Bool keep_id_record)
 {
+  no_warn timeout;
+  no_warn keep_id_record;
+
   if (bd->base1 == 0x1f0)
     return BDT_ATA;
   else

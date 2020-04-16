@@ -110,6 +110,10 @@ U8 *IntEntrySet(I64 irq,U0 (*fp_new_hndlr)(),I64 type=IDTET_IRQ,I64 dpl=0)
 {//Set interrupt vector. See $LK,"IDTET_IRQ",A="MN:IDTET_IRQ"$.
 //See $LK,"::/Demo/Lectures/InterruptDemo.HC"$.
   //See $LK,"::/Demo/MultiCore/Interrupts.HC"$.
+  no_warn irq;
+  no_warn fp_new_hndlr;
+  no_warn type;
+  no_warn dpl;
   /* VKernel NO-OP
   I64 fp=fp_new_hndlr;
   U8 *res,*dst;
