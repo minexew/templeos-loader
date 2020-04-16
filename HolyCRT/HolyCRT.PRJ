@@ -60,6 +60,6 @@
 #include "EdLite"
 #include "BlkDev/MakeBlkDev"
 #include "FunSeg"
-#include "VKMain"
+#include "InitRuntime"
 
 #exe {KCfgDel(kernel_cfg);};

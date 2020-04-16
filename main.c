@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
     if (!have_C) { vfs_init(argv[0], NULL, NULL, 0); }
     if (!have_D) { vfs_init(argv[0], NULL, NULL, 1); }
 
-    loader_main(argv[0], arg_kernel->filename[0], "VKMain",
+    loader_main(argv[0], arg_kernel->filename[0], "InitRuntime",
             true, NULL, 0);
 
 exit:

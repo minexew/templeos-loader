@@ -137,7 +137,7 @@ U0 Reboot()
 U0 KMain() {}
 
 // Entry point for the loader
-U0 VKMain()
+U0 InitRuntime()
 {
   //RawPutChar(':'); RawPutChar('^'); RawPutChar(')'); RawPutChar('\n');
 
@@ -168,10 +168,10 @@ U0 VKMain()
   // FIXME: is this ok? won't it be overwritten by something?
   mem_heap_base = 0x1000000;
 
-  VKStart64();
+  InitRuntime2();
 }
 
-U0 VKMain2()
+U0 InitRuntime3()
 {
   CBlkDev *bd;
   //OutU8(0x61,InU8(0x61)&~3); //Snd;
@@ -284,7 +284,6 @@ U0 VKMain2()
     Dbg;
   }
 
-  "VKernel start-up finished.\n";
   VSysCall(VSYSCALL_EXIT, 0, 0, 0, 0);
 
   LBts(&sys_run_level,RLf_ADAM_SERVER);

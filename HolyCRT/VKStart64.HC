@@ -78,5 +78,5 @@ XOR RSI, RSI
   CALL  SET_FS_BASE
   MOV RSP,U64 CTask.rsp[RAX]
 
-  JMP I32 VKMain2
+  JMP I32 InitRuntime3
 }

@@ -30,5 +30,5 @@ class CHostFsStat {
 };
 
 // TODO: not public
-public _extern _VKSTART64 U0 VKStart64();
+public _extern _VKSTART64 U0 InitRuntime2();
 public _extern _VSYSCALL I64 VSysCall(I64 num, I64 arg1, I64 arg2, I64 arg3, I64 arg4);
