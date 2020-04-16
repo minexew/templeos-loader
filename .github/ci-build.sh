@@ -18,3 +18,31 @@ mkdir cmake-build-debug
 cd cmake-build-debug
 env CC=musl-gcc PHYSFSDIR=$PWD/../build/physfs/ cmake ..
 cmake --build . --target templeos-loader
+cd ..
+
+export COMPILE_OUTPUT=CmpOutput/HolyCRT.BIN
+
+./make-holycrt.sh
+
+if [ ! -f $COMPILE_OUTPUT ]; then
+    echo error: expected output does not exist >&2 
+    exit 1
+fi
+
+m1=$(md5sum $COMPILE_OUTPUT)
+
+./remake-holycrt.sh
+
+m2=$(md5sum $COMPILE_OUTPUT)
+
+if [ "$m1" == "$m2" ] ; then
+    echo error: file did not change as expected >&2 
+    exit 1
+fi
+
+SIZE=$(wc -c <$COMPILE_OUTPUT)
+
+if [ $SIZE -le 100000 ]; then
+    echo error: output is smaller than expected >&2
+    exit 1
+fi
