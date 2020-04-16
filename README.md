@@ -36,27 +36,27 @@ For this reason, to avoid crashing, you must use a libc that is more "accomodati
     cd cmake-build-debug
     env CC=musl-gcc PHYSFSDIR=$PWD/../build/physfs/ cmake ..
     cmake --build . --target templeos-loader
+    cd ..
 
 One advantage of the described approach is that the resulting binary is linked statically and thus portable to any x86-64 Linux system
 
 ## Run
 
-    # checkout shrine-v6 branch VKernel
-    cd $SHRINEV6_DIR
+    # Example: compile the HolyC runtime
+    mkdir -p CmpOutput
 
-    # Recompile the kernel (example)
-    # templeos-loader <vkernel> <C:/> <C:/ writable> <D:/> <D:/ writable>
-    mkdir -p User/Compiler User/Kernel
-    env COMPILER=D:/Compiler STARTOS=CompileKernel.HC $LOADER_DIR/build/templeos-loader \
-        $LOADER_DIR/bootstrap/VKernel.BIN \
-        --drive=C,.,User \
-        --drive=D,$LOADER_DIR/bootstrap
+    env STARTOS=D:/HolyCRT/CmpHolyCRT.HC \
+        ./cmake-build-debug/templeos-loader MiniSystem/Kernel/HolyCRT.BIN \
+        --drive=C,MiniSystem \
+        --drive=D,.,CmpOutput
 
-    # now do the same, but using the newly compiled kernel to verify that it works
-    env COMPILER=D:/Compiler STARTOS=CompileKernel.HC $LOADER_DIR/build/templeos-loader \
-        User/Kernel/VKernel.BIN.C \
-        --drive=C,.,User \
-        --drive=D,$LOADER_DIR/bootstrap
+
+    # now do the same, but using the recompiled runtime to verify that it works
+    env STARTOS=D:/HolyCRT/CmpHolyCRT.HC \
+        ./cmake-build-debug/templeos-loader CmpOutput/HolyCRT.BIN \
+        --drive=C,MiniSystem \
+        --drive=D,.,CmpOutput
+
 
 ### Building TempleOS ISO from source
 
@@ -65,13 +65,11 @@ One advantage of the described approach is that the resulting binary is linked s
     cd TempleOS
 
     # bootstrap the necessary programs
-    mkdir -p User/Compiler User/Kernel
-    cp $LOADER_DIR/bootstrap/Compiler.BIN User/Compiler/
-    cp $LOADER_DIR/bootstrap/VKernel.BIN VKernel-good.BIN
+    mkdir -p User/Kernel
     cp $LOADER_DIR/examples/StartDoDistro.HC User/
 
     # build it!
-    env STARTOS=StartDoDistro $LOADER_DIR/build/templeos-loader VKernel-good.BIN --drive=C,.,User
+    env STARTOS=StartDoDistro $LOADER_DIR/build/templeos-loader $LOADER_DIR/MiniSystem/Kernel/HolyCRT.BIN --drive=C,.,User
 
     # look at the result
     ls -l User/Tmp/MyDistro.ISO.C
