@@ -133,6 +133,16 @@ U0 Reboot()
   SysHlt;
 }
 
+U0 HashAddSysSym(U8* name, I64 addr) {
+  CHashExport* tmpex;
+	tmpex=CAlloc(sizeof(CHashExport));
+	tmpex->str=StrNew(name);
+	tmpex->type=HTT_EXPORT_SYS_SYM|HTF_IMM;
+	tmpex->val=addr;
+	HashAdd(tmpex,Fs->hash_table);
+	SysSymImportsResolve(name,LDF_NO_ABSS|LDF_SILENT);
+}
+
 // Temporary...
 U0 KMain() {}
 
@@ -175,6 +185,10 @@ U0 InitRuntime()
   mem_heap_base = 0x1000000;
 }
 
+#exe {Option(OPTf_EXTERNS_TO_IMPORTS,ON);};
+extern U0 CompilerInit();
+#exe {Option(OPTf_EXTERNS_TO_IMPORTS,OFF);};
+
 U0 InitRuntime3()
 {
   CBlkDev *bd;
@@ -184,7 +198,10 @@ U0 InitRuntime3()
   SysGlblsInit;
   Mem32DevInit;
   // UncachedAliasAlloc; -- TODO: will we miss this?
-  LoadKernel;
+  if (sys_boot_patch_table_base) {
+    LoadKernel;
+  }
+  HostInjectStaticallyLinkedSymbols;
   SysGrInit;
   StrCpy(Fs->task_name,"Adam Task CPU00");
   StrCpy(Fs->task_title,Fs->task_name);
@@ -258,17 +275,19 @@ U0 InitRuntime3()
   //Spawn(&MsHardDrvrInstall);
 }
 
+// TODO: can allow both static and dynamic quite easily
 U0 RuntimeLoadCompiler()
 {
-  U8* compiler_path = HostGetEnv("COMPILER");
+  //U8* compiler_path = HostGetEnv("COMPILER");
 
-  if (!compiler_path) {
-    compiler_path = "Compiler";
-  }
+  //if (!compiler_path) {
+  //  compiler_path = "Compiler";
+  //}
 
-  "Loading %s\n", compiler_path;
+  //"Loading %s\n", compiler_path;
   Cd("/Compiler");
-  Load(compiler_path,LDF_SILENT);
+  //Load(compiler_path,LDF_SILENT);
+  CompilerInit();
   LBts(&sys_run_level,RLf_COMPILER);
 }
 
