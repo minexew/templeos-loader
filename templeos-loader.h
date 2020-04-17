@@ -10,9 +10,8 @@ struct drive_mapping {
     char const* writedir;
 };
 
-int loader_main(char const* argv0,
-                char const* kernel, const char* entrypoint,
-                bool vfs_configured_manually, struct drive_mapping const* drive_mappings, size_t num_drive_mappings
-                );
+int setup_vfs(char const* argv0, struct drive_mapping const* drive_mappings, size_t num_drive_mappings);
+void install_trap_handlers(void);
+int loader_enter(void* kernel_base, const char* entrypoint);
 
 #endif

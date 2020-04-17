@@ -82,7 +82,7 @@ void handler(int code, siginfo_t *info, void *ctx) {
         enum { X86_CLI = 0xFA };
 
         // Neutralized in kernel via #define in VKernel.HH, but may show up in Adam + apps
-        if (rip >= KERNEL_START && rip < FLAT_START + FLAT_SIZE && *(uint8_t*) rip == X86_CLI) {
+        if (/*rip >= KERNEL_START &&*/ rip < FLAT_START + FLAT_SIZE && *(uint8_t*) rip == X86_CLI) {
             //  hangs in libc :(
             // probably because we fuck with the memory so much
             //fprintf(stderr, "NOTE: patching out CLI instruction (opcode %02Xh) @ %p\n", *(uint8_t*) rip, rip);
@@ -104,17 +104,54 @@ void handler(int code, siginfo_t *info, void *ctx) {
 	int64_t (*Putchar)(int64_t);
 } kvm_calltable_t;*/
 
-int loader_main(char const* argv0,
-                char const* kernel, const char* entrypoint,
-                bool vfs_configured_manually, struct drive_mapping const* drive_mappings, size_t num_drive_mappings) {
+int setup_vfs(char const* argv0, struct drive_mapping const* drive_mappings, size_t num_drive_mappings) {
+    bool have_C = false, have_D = false;
+
+    for (int i = 0; i < num_drive_mappings; i++) {
+        // TODO: when we allow >2 drives, idx should be just dynamically assigned
+        // (kernel will call HostGetOptionDriveList to discover)
+        int idx;
+        if (drive_mappings[i].letter == 'C') { idx = 0; have_C = true; }
+        else if (drive_mappings[i].letter == 'D') { idx = 1; have_D = true; }
+        else {
+            fprintf(stderr, "only C and D drives can be mounted for the time being\n");
+            return -1;
+        }
+
+        // TODO: sanity check for re-definition of the same idx
+        vfs_init(argv0, drive_mappings[i].dir, drive_mappings[i].writedir, idx);
+    }
+
+    // Ensure both drives are initialized to prevent a crash
+    // TODO: is this needed?
+    if (!have_C) { vfs_init(argv0, NULL, NULL, 0); }
+    if (!have_D) { vfs_init(argv0, NULL, NULL, 1); }
+
+    return 0;
+}
+
+void install_trap_handlers(void) {
+    /* install trap handler */
+    struct sigaction sa = { };
+    sa.sa_flags = SA_SIGINFO;
+    sa.sa_sigaction = handler;
+    if (sigaction(SIGSEGV, &sa, NULL)) {
+        perror("sigaction() failed");
+        exit(1);
+    }
+    if (sigaction(SIGFPE, &sa, NULL)) {
+        perror("sigaction() failed");
+        exit(1);
+    }
+    if (sigaction(SIGILL, &sa, NULL)) {
+        perror("sigaction() failed");
+        exit(1);
+    }
+}
+
+int loader_enter(void* kernel_base, const char* entrypoint) {
 	//printf("pid: %d\n", getpid());
     //printf("pc: %p\n", get_pc());
-
-	/* load kernel image */
-    if (load_kernel(kernel, (void*) KERNEL_START, KERNEL_END - KERNEL_START) < 0) {
-        fprintf(stderr, "failed to load kernel %s\n", kernel);
-        return -1;
-    }
 
 	/* locate entry point */
     struct sym* KMain_sym = findsym(entrypoint);
@@ -135,55 +172,19 @@ int loader_main(char const* argv0,
         return -1;
     }
 
-    if (!vfs_configured_manually) {
-        bool have_C = false, have_D = false;
-
-        for (int i = 0; i < num_drive_mappings; i++) {
-            // TODO: when we allow >2 drives, idx should be just dynamically assigned
-            // (kernel will call HostGetOptionDriveList to discover)
-            int idx;
-            if (drive_mappings[i].letter == 'C') { idx = 0; have_C = true; }
-            else if (drive_mappings[i].letter == 'D') { idx = 1; have_D = true; }
-            else {
-                fprintf(stderr, "only C and D drives can be mounted for the time being\n");
-                return -1;
-            }
-
-            // TODO: sanity check for re-definition of the same idx
-            vfs_init(argv0, drive_mappings[i].dir, drive_mappings[i].writedir, idx);
-        }
-
-        // Ensure both drives are initialized to prevent a crash
-        // TODO: is this needed?
-        if (!have_C) { vfs_init(argv0, NULL, NULL, 0); }
-        if (!have_D) { vfs_init(argv0, NULL, NULL, 1); }
-    }
-
-    /* install trap handler */
-    struct sigaction sa = { };
-    sa.sa_flags = SA_SIGINFO;
-    sa.sa_sigaction = handler;
-    if (sigaction(SIGSEGV, &sa, NULL)) {
-        perror("sigaction() failed");
-        exit(1);
-    }
-    if (sigaction(SIGFPE, &sa, NULL)) {
-        perror("sigaction() failed");
-        exit(1);
-    }
-    if (sigaction(SIGILL, &sa, NULL)) {
-        perror("sigaction() failed");
-        exit(1);
-    }
-
     //kvm_calltable_t ct;
     //ct.Putchar = &TempleOS_Putchar;
     //memcpy((void*) (KERNEL_START + sizeof(struct CBinFile)), &ct, sizeof(ct));
 
     //printf("_VSYSCALL: %p\n", VSysCall_sym->address);
 
+    if ((uintptr_t) kernel_base >= INT32_MAX) {
+        fprintf(stderr, "assertion failure: kernel loaded too high\n");
+        return -1;
+    }
+
     // needed for LoadKernel and IDK if anything else
-    *(uint32_t*)mem_boot_base_sym->address = (uint32_t) 0x107c20;
+    *(uint32_t*)mem_boot_base_sym->address = ((uint32_t) (uintptr_t) kernel_base) + sizeof(struct CBinFile);
 
     *(uint64_t*)VSysCall_sym->address = (uint64_t) &vsyscall_dispatcher;
 

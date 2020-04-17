@@ -139,8 +139,6 @@ U0 KMain() {}
 // Entry point for the loader
 U0 InitRuntime()
 {
-  //RawPutChar(':'); RawPutChar('^'); RawPutChar(')'); RawPutChar('\n');
-
   // KStart16
 
   // We ignore this and instead override BIOSTotalMem
@@ -153,9 +151,17 @@ U0 InitRuntime()
   sys_boot_src = BOOT_SRC_HARDDRV;
   sys_boot_blk = 0;     // unused for HDD boot AFAIK
 
-  //mem_boot_base = 0x107c20; initialized in loader.c
-  CBinFile *bfh=mem_boot_base-sizeof(CBinFile);
-  sys_boot_patch_table_base = mem_boot_base-sizeof(CBinFile)+bfh->patch_table_offset;
+  // (mem_boot_base initialized in loader.c)
+  if (mem_boot_base) {
+    // Loading a BIN file, save pointer to patch table
+    CBinFile *bfh=mem_boot_base-sizeof(CBinFile);
+    sys_boot_patch_table_base = mem_boot_base-sizeof(CBinFile)+bfh->patch_table_offset;
+  }
+  else {
+    // Statically linked runtime, BIN header present
+    sys_boot_patch_table_base = 0;
+  }
+
   mem_mapped_space = VSysCall(VSYSCALL_MEMSIZE, 0, 0, 0, 0); // may not be entirely correct ?
 
   // KStart32

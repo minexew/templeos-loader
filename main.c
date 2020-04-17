@@ -1,3 +1,4 @@
+#include "load_kernel.h"
 #include "memory_map.h"
 #include "templeos-loader.h"
 #include "vfs.h"
@@ -17,7 +18,11 @@ int main(int argc, char** argv) {
     struct arg_end *end;
 
 	/* init memory map -- do this before anything else, particularly any mallocs */
-	if (init_memory_map() < 0)
+    uintptr_t kernel_start_address = 0x107c00;
+    uintptr_t kernel_reserve_size = 0x40000;
+    void* kernel_base = NULL;
+
+	if (init_memory_map(kernel_start_address, kernel_reserve_size, &kernel_base) < 0)
         exit(-1);
 
     void* argtable[] = {
@@ -97,8 +102,15 @@ int main(int argc, char** argv) {
     if (!have_C) { vfs_init(argv[0], NULL, NULL, 0); }
     if (!have_D) { vfs_init(argv[0], NULL, NULL, 1); }
 
-    loader_main(argv[0], arg_kernel->filename[0], "InitRuntime",
-            true, NULL, 0);
+    /* load kernel image */
+    const char* kernel_filename = arg_kernel->filename[0];
+    if (load_kernel(kernel_filename, kernel_base, kernel_reserve_size) < 0) {
+        fprintf(stderr, "failed to load kernel %s\n", kernel_filename);
+        return -1;
+    }
+
+    install_trap_handlers();
+    loader_enter(kernel_base, "InitRuntime");
 
 exit:
     arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
