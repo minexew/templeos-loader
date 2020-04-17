@@ -30,7 +30,7 @@ class CKCfg
 
 CDoc *KCfgAddDev(CKCfg *c)
 {
-  I64 ch;
+  //I64 ch;
   //CDoc *doc=DocNew;
   "\n\nIn anticipation of the drives you will\n"
 	"define shortly, enter the drive letter\n"
