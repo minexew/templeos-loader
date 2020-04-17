@@ -129,6 +129,12 @@ int loader_main(char const* argv0,
         return -1;
     }
 
+    struct sym* mem_boot_base_sym = findsym("mem_boot_base");
+    if (!mem_boot_base_sym) {
+        fprintf(stderr, "can't find symbol \"mem_boot_base\"\n");
+        return -1;
+    }
+
     if (!vfs_configured_manually) {
         bool have_C = false, have_D = false;
 
@@ -175,6 +181,9 @@ int loader_main(char const* argv0,
     //memcpy((void*) (KERNEL_START + sizeof(struct CBinFile)), &ct, sizeof(ct));
 
     //printf("_VSYSCALL: %p\n", VSysCall_sym->address);
+
+    // needed for LoadKernel and IDK if anything else
+    *(uint32_t*)mem_boot_base_sym->address = (uint32_t) 0x107c20;
 
     *(uint64_t*)VSysCall_sym->address = (uint64_t) &vsyscall_dispatcher;
 

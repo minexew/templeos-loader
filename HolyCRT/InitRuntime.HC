@@ -153,7 +153,7 @@ U0 InitRuntime()
   sys_boot_src = BOOT_SRC_HARDDRV;
   sys_boot_blk = 0;     // unused for HDD boot AFAIK
 
-  mem_boot_base = 0x107c20;
+  //mem_boot_base = 0x107c20; initialized in loader.c
   CBinFile *bfh=mem_boot_base-sizeof(CBinFile);
   sys_boot_patch_table_base = mem_boot_base-sizeof(CBinFile)+bfh->patch_table_offset;
   mem_mapped_space = VSysCall(VSYSCALL_MEMSIZE, 0, 0, 0, 0); // may not be entirely correct ?
