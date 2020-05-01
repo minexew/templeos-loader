@@ -72,7 +72,7 @@ add_custom_command(OUTPUT ${KERNEL_O}
 ## Compiler
 
 set(COMPILER_BIN ${CMAKE_CURRENT_LIST_DIR}/MiniSystem/Compiler/Compiler.BIN)
-#set(COMPILER_EXPORT_DEFS ${CMAKE_CURRENT_LIST_DIR}/HolyCRT/ExportDefs.HH)
+set(COMPILER_EXPORT_DEFS ${CMAKE_CURRENT_LIST_DIR}/HolyCRT/CompilerExportDefs.HH)
 set(COMPILER_IMPORT_DEFS ${CMAKE_CURRENT_LIST_DIR}/HolyCRT/CompilerImportDefs.HH)
 
 set(COMPILER_O32 ${CMAKE_CURRENT_BINARY_DIR}/Compiler.o32)
@@ -85,12 +85,11 @@ add_custom_command(OUTPUT ${COMPILER_O32} ${COMPILER_THUNKS} ${COMPILER_EXPORT_T
                         ${CMAKE_CURRENT_LIST_DIR}/bin2elf.py ${COMPILER_BIN}
                         -o ${COMPILER_O32}
                         --thunks-out ${COMPILER_THUNKS}
-#                        --export-defs ${HOLYCRT_EXPORT_DEFS}
+                        --export-defs ${COMPILER_EXPORT_DEFS}
                         --import-defs ${COMPILER_IMPORT_DEFS}
                         --export-table-out ${COMPILER_EXPORT_TABLE}
                         --export-main CompilerInit
-                   DEPENDS ${COMPILER_BIN} ${COMPILER_IMPORT_DEFS}
-#${HOLYCRT_EXPORT_DEFS}
+                   DEPENDS ${COMPILER_BIN} ${COMPILER_EXPORT_DEFS} ${COMPILER_IMPORT_DEFS}
 )
 
 # our python library only makes ELF32. oops!

@@ -23,6 +23,7 @@ class HolyCVariableDecl:
 
 declared_exports = dict()
 declared_imports = dict()
+suffixed = dict()
 
 def parse_holyc_declaration(line):
     line = line.strip()
@@ -46,7 +47,7 @@ def parse_holyc_declaration(line):
             type = type + name[:1]
             name = name[1:]
 
-        return HolyCVariableDecl(type, name)
+        return HolyCVariableDecl(name, type)
     else:
         assert line[-1:] == ")"
 
@@ -116,7 +117,16 @@ def make_object(f, image, relocations, exports, main_symbol_name, section_name, 
 
             symbol_name = main_symbol_name + symbol_suffix
         else:
-            symbol_name = export.name + symbol_suffix
+            # Is the symbol a variable? We cannot tell from the BIN file, but it may have been specified in ExportDefs.HH.
+            name_str = export.name.decode(errors="replace")
+            if name_str in declared_exports and isinstance(declared_exports[name_str], HolyCVariableDecl):
+                # In that case, do not apply mangling in order to make the variable visible in C code
+                symbol_name = export.name
+            else:
+                # By default, we mangle
+                symbol_name = export.name + symbol_suffix
+
+        suffixed[export.name] = symbol_name
 
         elf.append_symbol(symbol_name, sym_section=bincode_id, sym_offset=export.address,
                 sym_size=0, sym_binding=STB.STB_GLOBAL)
@@ -182,6 +192,8 @@ def make_object(f, image, relocations, exports, main_symbol_name, section_name, 
 def make_export_thunks(f, exports, symbol_suffix):
     for _, defn in sorted(exports.items()):
         if not isinstance(defn, HolyCFunctionDecl):
+            # Nothing to do here for variables -- if it has been exported with a suffix, we cannot rename it with a thunk
+            # Therefore, variables are handled differently (earlier)
             continue
 
         thunk_name = defn.name
@@ -286,10 +298,11 @@ def make_import_thunks(f, imports, symbol_suffix):
 """)
 
 
-def write_export_table(f, exports, symbol_suffix):
+def write_export_table(f, exports, suffixed: dict):
     for export in sorted([e for e in exports if e.type != binfile.Etype.IET_MAIN], key=lambda e: e.name):
         try:
             name = export.name.decode()
+            suffixed_name = suffixed[export.name].decode()
         except UnicodeDecodeError:
             print(f"Warning: skipping export generation for broken symbol name {export.name}")
             continue
@@ -297,8 +310,6 @@ def write_export_table(f, exports, symbol_suffix):
         if not len(name):
             print(f"Warning: skipping export generation for anonymous symbol at {export.addr}")
             continue
-
-        suffixed_name = name + symbol_suffix
 
         f.write(f'''
     .asciz "{name}"
@@ -362,5 +373,5 @@ if __name__ == "__main__":
 .section .holyc_sym, "a", @progbits
 """)
 
-            write_export_table(f, exports, symbol_suffix=args.symbol_suffix)
+            write_export_table(f, exports, suffixed=suffixed)
 

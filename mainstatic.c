@@ -8,7 +8,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Declarations of runtime exports; can perhaps generate automatically?
 void HashAddSysSym(const char* name, uintptr_t addr);
+bool Cd(const char* dirname, bool make_dirs);
+void RuntimeStartOS();
+extern uint32_t sys_run_level;
+#define RLF_COMPILER		0x001000
+
 extern uint8_t __holyc_sym_table_start[0], __holyc_sym_table_end[0];
 
 void inject_extra_symbols(void) {
@@ -119,10 +125,18 @@ int main(int argc, char** argv) {
     install_trap_handlers();
 
     __asm__(
-        "movl $0, mem_boot_base$Temple(%rip)\r\n"
-        "movq $vsyscall_dispatcher, _VSYSCALL_DISPATCHER$Temple(%rip)\r\n"
+        "movl $0, mem_boot_base(%rip)\r\n"
+        "movq $vsyscall_dispatcher, _VSYSCALL_DISPATCHER(%rip)\r\n"
         "call InitRuntime$Temple\r\n"
+        "call _VKSTART64$Temple\r\n"
+        "call InitRuntime3$Temple\r\n"
     );
+
+    Cd("/Compiler", false);
+    CompilerInit();
+    sys_run_level |= RLF_COMPILER;
+
+    RuntimeStartOS();
 
 exit:
     arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));

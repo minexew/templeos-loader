@@ -275,19 +275,17 @@ U0 InitRuntime3()
   //Spawn(&MsHardDrvrInstall);
 }
 
-// TODO: can allow both static and dynamic quite easily
 U0 RuntimeLoadCompiler()
 {
-  //U8* compiler_path = HostGetEnv("COMPILER");
+  U8* compiler_path = HostGetEnv("COMPILER");
 
-  //if (!compiler_path) {
-  //  compiler_path = "Compiler";
-  //}
+  if (!compiler_path) {
+    compiler_path = "Compiler";
+  }
 
-  //"Loading %s\n", compiler_path;
+  "Loading %s\n", compiler_path;
   Cd("/Compiler");
-  //Load(compiler_path,LDF_SILENT);
-  CompilerInit();
+  Load(compiler_path,LDF_SILENT);
   LBts(&sys_run_level,RLf_COMPILER);
 }
 
