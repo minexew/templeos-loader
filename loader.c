@@ -149,26 +149,39 @@ void install_trap_handlers(void) {
     }
 }
 
-int loader_enter(void* kernel_base, const char* entrypoint) {
+static bool get_symbol(const char* name, void** sym) {
+    struct sym* sym_ = findsym(name);
+
+    if (!sym_) {
+        fprintf(stderr, "can't find symbol \"%s\"\n", name);
+        return false;
+    }
+
+    *sym = sym_->address;
+    return true;
+}
+
+int loader_enter(void* kernel_base) {
 	//printf("pid: %d\n", getpid());
     //printf("pc: %p\n", get_pc());
 
 	/* locate entry point */
-    struct sym* KMain_sym = findsym(entrypoint);
-    if (!KMain_sym) {
-        fprintf(stderr, "can't find symbol \"%s\"\n", entrypoint);
-        return -1;
-    }
+    uint64_t* VSYSCALL_DISPATCHER;
+    uint32_t* mem_boot_base;
+    void (*InitRuntime)();
+    void (*InitRuntime2)();
+    void (*InitRuntime3)();
+    void (*RuntimeLoadCompiler)();
+    void (*RuntimeStartOS)();
 
-    struct sym* VSysCall_sym = findsym("_VSYSCALL_DISPATCHER");
-    if (!VSysCall_sym) {
-        fprintf(stderr, "can't find symbol \"_VSYSCALL_DISPATCHER\"\n");
-        return -1;
-    }
-
-    struct sym* mem_boot_base_sym = findsym("mem_boot_base");
-    if (!mem_boot_base_sym) {
-        fprintf(stderr, "can't find symbol \"mem_boot_base\"\n");
+    if (!get_symbol("InitRuntime",          (void*) &InitRuntime)
+     || !get_symbol("_VKSTART64",           (void*) &InitRuntime2)
+     || !get_symbol("InitRuntime3",         (void*) &InitRuntime3)
+     || !get_symbol("_VSYSCALL_DISPATCHER", (void*) &VSYSCALL_DISPATCHER)
+     || !get_symbol("mem_boot_base",        (void*) &mem_boot_base)
+     || !get_symbol("RuntimeLoadCompiler",  (void*) &RuntimeLoadCompiler)
+     || !get_symbol("RuntimeStartOS",       (void*) &RuntimeStartOS)
+        ) {
         return -1;
     }
 
@@ -184,18 +197,20 @@ int loader_enter(void* kernel_base, const char* entrypoint) {
     }
 
     // needed for LoadKernel and IDK if anything else
-    *(uint32_t*)mem_boot_base_sym->address = ((uint32_t) (uintptr_t) kernel_base) + sizeof(struct CBinFile);
+    *mem_boot_base = ((uint32_t) (uintptr_t) kernel_base) + sizeof(struct CBinFile);
 
-    *(uint64_t*)VSysCall_sym->address = (uint64_t) &vsyscall_dispatcher;
+    *VSYSCALL_DISPATCHER = (uint64_t) &vsyscall_dispatcher;
 
 //printf("putchar: %p\n", TempleOS_Putchar);
 //    printf("vsyscall_dispatcher: %p\n", vsyscall_dispatcher);
 	/* jump to it */
 	/* past this point, Fs/Gs will be clobbered so we should not use glibc functions */
     //printf("KMain: %p\n", KMain_sym->address);
-    void (*KMain)() = (void(*)()) KMain_sym->address;
-
-    KMain();
+    InitRuntime();
+    InitRuntime2();
+    InitRuntime3();
+    RuntimeLoadCompiler();
+    RuntimeStartOS();
 
     return 0;
 }

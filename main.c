@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
     }
 
     install_trap_handlers();
-    loader_enter(kernel_base, "InitRuntime");
+    loader_enter(kernel_base);
 
 exit:
     arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));

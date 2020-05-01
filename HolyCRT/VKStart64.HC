@@ -1,3 +1,5 @@
+// This is now in ASM, but there is no particular reason to keep it that way
+
 asm {
 USE64
 _VKSTART64::
@@ -76,7 +78,9 @@ XOR RSI, RSI
   PUSH  U32 SYS_FIXED_AREA+CSysFixedArea.adam
   CALL  &TaskInit
   CALL  SET_FS_BASE
-  MOV RSP,U64 CTask.rsp[RAX]
 
-  JMP I32 InitRuntime3
+  // TODO: this -- or the other way around -- needs to be done eventually for multitasking
+  //MOV RSP,U64 CTask.rsp[RAX]
+
+  RET
 }

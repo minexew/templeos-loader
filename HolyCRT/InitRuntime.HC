@@ -173,8 +173,6 @@ U0 InitRuntime()
 
   // FIXME: is this ok? won't it be overwritten by something?
   mem_heap_base = 0x1000000;
-
-  InitRuntime2();
 }
 
 U0 InitRuntime3()
@@ -258,8 +256,10 @@ U0 InitRuntime3()
   MsInit;
   //KbdInit;
   //Spawn(&MsHardDrvrInstall);
+}
 
-
+U0 RuntimeLoadCompiler()
+{
   U8* compiler_path = HostGetEnv("COMPILER");
 
   if (!compiler_path) {
@@ -270,7 +270,10 @@ U0 InitRuntime3()
   Cd("/Compiler");
   Load(compiler_path,LDF_SILENT);
   LBts(&sys_run_level,RLf_COMPILER);
+}
 
+U0 RuntimeStartOS()
+{
   DbgMode(OFF);
   cnts.time_stamp_freq_initial=TimeCal;
   Cd("/");

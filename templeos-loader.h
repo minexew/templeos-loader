@@ -12,6 +12,6 @@ struct drive_mapping {
 
 int setup_vfs(char const* argv0, struct drive_mapping const* drive_mappings, size_t num_drive_mappings);
 void install_trap_handlers(void);
-int loader_enter(void* kernel_base, const char* entrypoint);
+int loader_enter(void* kernel_base);
 
 #endif
