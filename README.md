@@ -61,7 +61,7 @@ One advantage of the described approach is that the resulting binary is linked s
 ### Building TempleOS ISO from source
 
     # check out the TempleOS source tree
-    git checkout https://github.com/cia-foundation/TempleOS.git
+    git clone https://github.com/cia-foundation/TempleOS.git
     cd TempleOS
 
     # bootstrap the necessary programs
@@ -69,7 +69,7 @@ One advantage of the described approach is that the resulting binary is linked s
     cp $LOADER_DIR/examples/StartDoDistro.HC User/
 
     # build it!
-    env STARTOS=StartDoDistro $LOADER_DIR/build/templeos-loader $LOADER_DIR/MiniSystem/Kernel/HolyCRT.BIN --drive=C,.,User
+    env STARTOS=StartDoDistro $LOADER_DIR/cmake-build-debug/templeos-loader $LOADER_DIR/MiniSystem/Kernel/HolyCRT.BIN --drive=C,.,User
 
     # look at the result
     ls -l User/Tmp/MyDistro.ISO.C
