@@ -247,8 +247,16 @@ def make_import_thunks(f, imports, symbol_suffix):
 .global     {thunk_name}
 
 {thunk_name}:
-    /* a simple jump would be sufficient, but this yields a more useful stack trace */
-    call abort
+    push %rax
+    push $_s_{plain_name}
+    lea 0(%rip), %rax
+    push %rax
+    call ResolveJitImport$Temple
+    pop %rax
+    jmp {thunk_name}
+
+_s_{plain_name}:
+    .asciz "{plain_name}"
 
     .size {thunk_name}, .-{thunk_name}
 """)

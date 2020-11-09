@@ -143,6 +143,35 @@ U0 HashAddSysSym(U8* name, I64 addr) {
 	SysSymImportsResolve(name,LDF_NO_ABSS|LDF_SILENT);
 }
 
+U0 ResolveJitImport(U8* self_addr, U8* func_name) {
+  CHashExport* tmpex;
+  // "ResolveJitImport(%08X, %08X => %s)\n", self_addr, func_name, func_name;
+  tmpex=HashFind(func_name, Fs->hash_table,HTG_ALL-HTT_IMPORT_SYS_SYM);
+
+  if (tmpex) {
+    // emit JMP rel32 (0xE9 XX YY ZZ WW)
+
+    // self_addr corresponds to (function start + 13)
+    // we need to generate the 32-bit value at (function start + 1)
+    // with a rel32 operand (with respect to (function start + 5))
+
+    U8* func_start = self_addr - 13;
+    U32* operand_addr = (func_start + 1)(U32*);
+    I64 rel_base = (func_start + 5)(I64);
+    I32 rel_value = tmpex(CHashFun *)->exe_addr - rel_base;  // TODO verify
+    // "  %08X - %08X - %08X\n", tmpex(CHashFun *)->exe_addr, rel_base, rel_value;
+    *func_start = 0xE9;
+    *operand_addr = rel_value;
+
+    // return tmpex->val;
+  }
+  else {
+    // "  ERROR\n";
+    // return 0;
+    // FIXME
+  }
+}
+
 // Temporary...
 U0 KMain() {}
 
@@ -168,8 +197,10 @@ U0 InitRuntime()
     sys_boot_patch_table_base = mem_boot_base-sizeof(CBinFile)+bfh->patch_table_offset;
   }
   else {
-    // Statically linked runtime, BIN header present
+    // Statically linked runtime, no BIN header present
     sys_boot_patch_table_base = 0;
+
+    // TODO: We still need to fake mem_boot_base & the kernel header for Adam/ADefine.HC
   }
 
   mem_mapped_space = VSysCall(VSYSCALL_MEMSIZE, 0, 0, 0, 0); // may not be entirely correct ?
