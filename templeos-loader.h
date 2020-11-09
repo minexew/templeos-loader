@@ -14,4 +14,6 @@ int setup_vfs(char const* argv0, struct drive_mapping const* drive_mappings, siz
 void install_trap_handlers(void);
 int loader_enter(void* kernel_base);
 
+void vsyscall_save_host_fs(void);
+
 #endif

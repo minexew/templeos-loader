@@ -147,6 +147,9 @@ void install_trap_handlers(void) {
         perror("sigaction() failed");
         exit(1);
     }
+
+    /* also save FS */
+    vsyscall_save_host_fs();
 }
 
 static bool get_symbol(const char* name, void** sym) {

@@ -24,9 +24,16 @@
 long arch_prctl(int, unsigned long);
 
 //#define trace_syscall(args) printf args
-#define trace_syscall(args) do {} while(0)
+ #define trace_syscall(args) do {} while(0)
+
+uint64_t host_fs;
+uint64_t emulated_fs;
 
 int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg3, int64_t arg4) {
+    int64_t rc = 0;
+
+    arch_prctl(ARCH_SET_FS, host_fs);
+
     switch (num) {
         case VSYSCALL_ADDSYM: {
             const char* module = (const char*) arg1;
@@ -35,18 +42,19 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             trace_syscall(("VSYSCALL_ADDSYM(%s, %s, %p)\n", module, name, addr));
 
             addsym(module, name, addr);
-            return 0;
+            break;
         }
         case VSYSCALL_CLOSEDIR: {
             struct vfs_dir_t* dirp = (struct vfs_dir_t*) arg1;
             unsigned char dv = arg2;
 
             trace_syscall(("VSYSCALL_CLOSEDIR(%p, %d)\n", dirp, dv));
-            return vfs_closedir(dirp, dv);
+            rc = vfs_closedir(dirp, dv);
+            break;
         }
         case VSYSCALL_DEBUG: {
             printf("[DEBUG] %s\t%d\t%08X\n", (const char*) arg1, arg2, arg2);
-            return 0;
+            break;
         }
         case VSYSCALL_EXIT: {
             exit(arg1);
@@ -58,7 +66,8 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             unsigned char dv = arg4;
             trace_syscall(("VSYSCALL_FGET(%s, %p, %d, %d)\n", path, buf, bufsiz, dv));
 
-            return vfs_fget(path, buf, bufsiz, dv);
+            rc = vfs_fget(path, buf, bufsiz, dv);
+            break;
         }
         case VSYSCALL_FPUT: {
             const char* path = (const char*) arg1;
@@ -67,24 +76,28 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             unsigned char dv = arg4;
             trace_syscall(("VSYSCALL_FPUT(%s, %p, %d, %d)\n", path, buf, bufsiz, dv));
 
-            return vfs_fput(path, buf, bufsiz, dv);
+            rc = vfs_fput(path, buf, bufsiz, dv);
+            break;
         }
         case VSYSCALL_MEMSIZE: {
             trace_syscall(("VSYSCALL_MEMSIZE\n"));
-            return FLAT_SIZE - 0x1000;
+            rc = FLAT_SIZE - 0x1000;
+            break;
         }
         case VSYSCALL_MKDIR: {
             const char* path = (const char*) arg1;
             unsigned char dv = arg2;
 
             trace_syscall(("VSYSCALL_MKDIR(%s,%d)\n", path, dv));
-            return vfs_mkdir(path, dv);
+            rc = vfs_mkdir(path, dv);
+            break;
         }
         case VSYSCALL_OPENDIR: {
             const char* path = (const char*) arg1;
             unsigned char dv = arg2;
             trace_syscall(("VSYSCALL_OPENDIR(%s, %d)\n", path, dv));
-            return (int64_t) vfs_opendir(path, dv);
+            rc = (int64_t) vfs_opendir(path, dv);
+            break;
         }
         case VSYSCALL_PUTCHAR: {
             uint8_t c = arg1;
@@ -120,7 +133,7 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
                 }
             }
 
-            return 0;
+            break;
         }
         case VSYSCALL_READ: {
             int fd = (int) arg1;
@@ -128,7 +141,8 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             size_t nbytes = (size_t) arg3;
 
             trace_syscall(("VSYSCALL_READ(%d, %p, %zu)\n", fd, buf, nbytes));
-            return read(0, buf, nbytes);
+            rc = read(0, buf, nbytes);
+            break;
         }
         case VSYSCALL_READDIR: {
             struct vfs_dir_t* dirp = (struct vfs_dir_t*) arg1;
@@ -136,17 +150,18 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             unsigned char dv = arg3;
 
             trace_syscall(("VSYSCALL_READDIR(%p, %p, %d)\n", dirp, st_out, dv));
-            return vfs_readdir(dirp, st_out, dv);
+            rc = vfs_readdir(dirp, st_out, dv);
+            break;
         }
         case VSYSCALL_SETFS: {
-            int rc = arch_prctl(ARCH_SET_FS, arg1);
+            emulated_fs = arg1;
             trace_syscall(("VSYSCALL_SETFS(%p)\n", arg1));
-            return 0;
+            break;
         }
         case VSYSCALL_SETGS: {
-            int rc = arch_prctl(ARCH_SET_GS, arg1);
+            arch_prctl(ARCH_SET_GS, arg1);
             trace_syscall(("VSYSCALL_SETGS(%p)\n", arg1));
-            return 0;
+            break;
         }
         case VSYSCALL_STATCLUS: {
             clus_t clus = arg1;
@@ -154,36 +169,48 @@ int64_t vsyscall_dispatcher(int64_t num, int64_t arg1, int64_t arg2, int64_t arg
             unsigned char dv = arg3;
             trace_syscall(("VSYSCALL_STATCLUS(%d, %p, %d)\n", (int) clus, st_out, dv));
 
-            int rc = vfs_statclus(clus, st_out, dv);
+            rc = vfs_statclus(clus, st_out, dv);
             trace_syscall((" -> %d\n", rc));
-            return rc;
+            break;
         }
         case VSYSCALL_STAT: {
             const char* path = (const char*) arg1;
             struct CHostFsStat* st_out = (struct CHostFsStat*) arg2;
             unsigned char dv = arg3;
             trace_syscall(("VSYSCALL_STAT(%s, %p, %d)\n", path, st_out, dv));
-            int rc = -1;
             rc = vfs_stat(path, st_out, dv);
             trace_syscall((" -> %d\n", rc));
-            return rc;
+            break;
         }
         case VSYSCALL_UNLINK: {
             const char* path = (const char*) arg1;
             unsigned char dv = arg2;
 
             trace_syscall(("VSYSCALL_UNLINK(%s, %d)\n", path, dv));
-            return vfs_unlink(path, dv);
+            rc = vfs_unlink(path, dv);
+            break;
         }
         case VSYSCALL_USLEEP: {
             trace_syscall(("VSYSCALL_USLEEP(%d)\n", arg1));
             usleep(arg1);
-            return 0;
+            rc = 0;
+            break;
         }
         default: {
             fprintf(stderr, "Bad syscall %d\n", num);
             //*((char*)0) = 0;        // TODO: crash
-            return -1;
+            rc = -1;
         }
     }
+
+    // Restore FS
+    arch_prctl(ARCH_SET_FS, emulated_fs);
+    return rc;
+}
+
+// Inspired by musl's __get_tp
+void vsyscall_save_host_fs(void) {
+    uintptr_t tp;
+    __asm__ ("mov %%fs:0,%0" : "=r" (tp) );
+    host_fs = tp;
 }

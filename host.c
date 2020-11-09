@@ -18,10 +18,14 @@ uint32_t HostGetApiVersion(void) {
 }
 
 const char* HostGetEnv(const char* name) {
+    // FIXME: FS register handling
+
     return getenv(name);
 }
 
 void HostGetLocalTime(struct CDateStruct* ds_out) {
+    // FIXME: FS register handling
+
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     timespec_to_CDateStruct_local(ts.tv_sec, ts.tv_nsec, ds_out);
