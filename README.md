@@ -76,7 +76,7 @@ For this reason, to avoid crashing, you must use a libc that is more "accomodati
 
 loader is actually agnostic to these, but for now we document them here:
 
-- `COMPILER` (default _Compiler_) - compiler binary path relative to /Compiler/
+- `COMPILER` (default _Compiler_) - compiler binary path relative to /Compiler/ (relevant only in dynamic mode)
 - `STARTOS` (default _StartOS_) - StartOS.HC path relative to /
 
 Note that these files must be accessible through one of the virtualized drives!
