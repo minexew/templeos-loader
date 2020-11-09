@@ -263,19 +263,19 @@ def make_import_thunks(f, imports, symbol_suffix):
 {thunk_name}:
     push %rdi
     push %rsi
-    push %rdx
+    /*push %rdx
     push %rcx
     push %r8
-    push %r9
+    push %r9*/
     push %r10
     push %r11
 """)
 
             if num_args >= 1:
-                f.write("    mov 72(%rsp), %rdi\n")
+                f.write("    mov 40(%rsp), %rdi\n")
             
             if num_args >= 2:
-                f.write("    mov 80(%rsp), %rsi\n")
+                f.write("    mov 48(%rsp), %rsi\n")
 
             if num_args >= 3:
                 raise Exception("Too many arguments, not implemented")
@@ -285,10 +285,10 @@ def make_import_thunks(f, imports, symbol_suffix):
 
     pop %r11
     pop %r10
-    pop %r9
+    /*pop %r9
     pop %r8
     pop %rcx
-    pop %rdx
+    pop %rdx*/
     pop %rsi
     pop %rdi
 
