@@ -4,3 +4,9 @@
 [submodule "physfslt-3.0.2"]
 	path = physfslt-3.0.2
 	url = https://github.com/ljward10/physfslt-3.0.2.git
+[submodule "makeelf"]
+	path = dependencies/makeelf
+	url = https://github.com/minexew/makeelf.git
+[submodule "dependencies/bininfo"]
+	path = dependencies/bininfo
+	url = https://github.com/cia-foundation/bininfo.git

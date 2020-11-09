@@ -2,4 +2,5 @@
 public extern U32   HostGetApiVersion();
 public extern U8*   HostGetEnv(U8* name);
 public extern U0    HostGetLocalTime(CDateStruct* ds_out);
+public extern U0    HostInjectStaticallyLinkedSymbols();
 #exe {Option(OPTf_EXTERNS_TO_IMPORTS,OFF);};
