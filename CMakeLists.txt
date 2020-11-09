@@ -97,12 +97,12 @@ add_custom_command(OUTPUT ${COMPILER_O}
                    COMMAND objcopy -I elf32-x86-64 -O elf64-x86-64 ${COMPILER_O32} ${COMPILER_O}
                    DEPENDS ${COMPILER_O32})
 
-add_executable("templeos"
+add_executable("templeoskernel"
                 ${KERNEL_THUNKS} ${KERNEL_O} ${HOLYCRT_EXPORT_TABLE}
                 ${COMPILER_THUNKS} ${COMPILER_O} ${COMPILER_EXPORT_TABLE}
                 mainstatic.c)
-target_include_directories("templeos" PRIVATE ${PROJECT_SOURCE_DIR}/argtable3/src)
-target_link_libraries("templeos" PRIVATE argtable3_static "libtempleos-loader" -static)
-target_link_options("templeos" PUBLIC "-Wl,-T${CMAKE_CURRENT_LIST_DIR}/elf64-x86-64.ld")
+target_include_directories("templeoskernel" PRIVATE ${PROJECT_SOURCE_DIR}/argtable3/src)
+target_link_libraries("templeoskernel" PRIVATE argtable3_static "libtempleos-loader" -static)
+target_link_options("templeoskernel" PUBLIC "-Wl,-T${CMAKE_CURRENT_LIST_DIR}/elf64-x86-64.ld")
 # Make .text writable (HolyC places variables there)
-target_link_options("templeos" PUBLIC "-Wl,--omagic")
+target_link_options("templeoskernel" PUBLIC "-Wl,--omagic")

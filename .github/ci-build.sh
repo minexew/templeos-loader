@@ -17,7 +17,7 @@ cd ..
 mkdir cmake-build-debug
 cd cmake-build-debug
 env CC=musl-gcc PHYSFSDIR=$PWD/../build/physfs/ cmake ..
-cmake --build . --target templeos
+cmake --build . --target templeoskernel
 cd ..
 
 export COMPILE_OUTPUT=CmpOutput/HolyCRT.BIN
