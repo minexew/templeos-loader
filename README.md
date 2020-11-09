@@ -9,7 +9,7 @@ _templeos-loader_ allows you to use your Linux system for some tasks that previo
 
 However, the primary goal is not "to bring HolyC to Linux". The TempleOS programming environment is heavily graphics-based, and too unique to blend in with anything else. Therefore, in the long run, we would like to reproduce the complete, authentic TempleOS experience, in Linux user-space, without a clunky VM. 
 
-## Building
+## Building prerequisites
 
 glibc definitely does not appreciate the way we handle memory.
 For this reason, to avoid crashing, you must use a libc that is more "accomodating", such as musl
@@ -30,35 +30,25 @@ For this reason, to avoid crashing, you must use a libc that is more "accomodati
     env CC=musl-gcc cmake -DCMAKE_INSTALL_PREFIX:PATH=$PWD/../build/physfs -DPHYSFS_BUILD_SHARED=OFF . && make install
     cd ..
 
-### Build templeos-loader
+## Build TempleOS Kernel For Linux in ("static mode", recommended)
 
     mkdir cmake-build-debug
     cd cmake-build-debug
     env CC=musl-gcc PHYSFSDIR=$PWD/../build/physfs/ cmake ..
-    cmake --build . --target templeos-loader
+    cmake --build . --target templeoskernel
     cd ..
 
-One advantage of the described approach is that the resulting binary is linked statically and thus portable to any x86-64 Linux system
-
-## Run
+### Run
 
     # Example: compile the HolyC runtime
     mkdir -p CmpOutput
 
     env STARTOS=D:/HolyCRT/CmpHolyCRT.HC \
-        ./cmake-build-debug/templeos-loader MiniSystem/Kernel/HolyCRT.BIN \
+        ./cmake-build-debug/templeos \
         --drive=C,MiniSystem \
         --drive=D,.,CmpOutput
 
-
-    # now do the same, but using the recompiled runtime to verify that it works
-    env STARTOS=D:/HolyCRT/CmpHolyCRT.HC \
-        ./cmake-build-debug/templeos-loader CmpOutput/HolyCRT.BIN \
-        --drive=C,MiniSystem \
-        --drive=D,.,CmpOutput
-
-
-### Building TempleOS ISO from source
+### Building a TempleOS ISO from source
 
     # check out the TempleOS source tree
     git checkout https://github.com/cia-foundation/TempleOS.git
@@ -69,10 +59,18 @@ One advantage of the described approach is that the resulting binary is linked s
     cp $LOADER_DIR/examples/StartDoDistro.HC User/
 
     # build it!
-    env STARTOS=StartDoDistro $LOADER_DIR/build/templeos-loader $LOADER_DIR/MiniSystem/Kernel/HolyCRT.BIN --drive=C,.,User
+    env STARTOS=StartDoDistro $LOADER_DIR/build/templeos --drive=C,.,User
 
     # look at the result
     ls -l User/Tmp/MyDistro.ISO.C
+
+## Build TempleOS Loader For Linux ("dynamic mode")
+
+    mkdir cmake-build-debug
+    cd cmake-build-debug
+    env CC=musl-gcc PHYSFSDIR=$PWD/../build/physfs/ cmake ..
+    cmake --build . --target templeos-loader
+    cd ..
 
 ## Environment variables
 
