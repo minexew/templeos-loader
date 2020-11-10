@@ -27,10 +27,10 @@ For this reason, to avoid crashing, you must use a libc that is more "accomodati
 
     git submodule update --init --recursive
     cd physfslt-3.0.2
-    env CC=musl-gcc cmake -DCMAKE_INSTALL_PREFIX:PATH=$PWD/../build/physfs -DPHYSFS_BUILD_SHARED=OFF . && make install
+    env CC=musl-gcc cmake -DCMAKE_INSTALL_PREFIX:PATH=$PWD/../build/physfs -DPHYSFS_BUILD_SHARED=OFF -DPHYSFS_BUILD_TEST=OFF . && make install
     cd ..
 
-## Build TempleOS Kernel For Linux in ("static mode", recommended)
+## Build TempleOS On Linux ("static mode", recommended)
 
     mkdir cmake-build-debug
     cd cmake-build-debug

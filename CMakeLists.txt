@@ -106,3 +106,5 @@ target_link_libraries("templeoskernel" PRIVATE argtable3_static "libtempleos-loa
 target_link_options("templeoskernel" PUBLIC "-Wl,-T${CMAKE_CURRENT_LIST_DIR}/elf64-x86-64.ld")
 # Make .text writable (HolyC places variables there)
 target_link_options("templeoskernel" PUBLIC "-Wl,--omagic")
+# We don't play nice with RELRO (which is enabled by default in Ubuntu's gcc, for example)
+target_link_options("templeoskernel" PUBLIC "-Wl,-z,norelro")
