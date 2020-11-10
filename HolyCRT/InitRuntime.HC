@@ -258,6 +258,13 @@ U0 InitRuntime3()
     Panic("Host API version 3.0+ required");
   }
 
+  // Now that we have MAlloc, also create fake mem_boot_base if needed
+  if (!mem_boot_base) {
+    CBinFile* bfh=MAlloc(sizeof(CBinFile));
+    bfh->file_size = 0x100000;    // TODO: we can put in something more meaningful?
+    mem_boot_base = bfh(U8*) + sizeof(CBinFile);
+  }
+
   //TimersInit;
   //if (BIOSTotalMem<ToI64(0.95*MEM_MIN_MEG*0x100000))
   //  RawPrint(4000,"!!! Requires $TX,"512Meg",D="DD_MEM_MIN_MEG"$ of RAM Memory !!!");
