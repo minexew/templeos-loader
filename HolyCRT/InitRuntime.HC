@@ -143,7 +143,7 @@ U0 HashAddSysSym(U8* name, I64 addr) {
 	SysSymImportsResolve(name,LDF_NO_ABSS|LDF_SILENT);
 }
 
-U0 ResolveJitImport(U8* self_addr, U8* func_name) {
+U8* ResolveJitImport(U8* thunk_addr, U8* func_name) {
   CHashExport* tmpex;
   // "ResolveJitImport(%08X, %08X => %s)\n", self_addr, func_name, func_name;
   tmpex=HashFind(func_name, Fs->hash_table,HTG_ALL-HTT_IMPORT_SYS_SYM);
@@ -151,24 +151,21 @@ U0 ResolveJitImport(U8* self_addr, U8* func_name) {
   if (tmpex) {
     // emit JMP rel32 (0xE9 XX YY ZZ WW)
 
-    // self_addr corresponds to (function start + 13)
-    // we need to generate the 32-bit value at (function start + 1)
-    // with a rel32 operand (with respect to (function start + 5))
+    // we need to generate the 32-bit value at (thunk_addr + 1)
+    // with a rel32 operand relative to (thunk_addr + 5)
 
-    U8* func_start = self_addr - 13;
-    U32* operand_addr = (func_start + 1)(U32*);
-    I64 rel_base = (func_start + 5)(I64);
+    U32* operand_addr = (thunk_addr + 1)(U32*);
+    I64 rel_base = (thunk_addr + 5)(I64);
     I32 rel_value = tmpex(CHashFun *)->exe_addr - rel_base;  // TODO verify
     // "  %08X - %08X - %08X\n", tmpex(CHashFun *)->exe_addr, rel_base, rel_value;
-    *func_start = 0xE9;
+    *thunk_addr = 0xE9;
     *operand_addr = rel_value;
-
-    // return tmpex->val;
+    return tmpex(CHashFun *)->exe_addr;
   }
   else {
     // "  ERROR\n";
-    // return 0;
     // FIXME
+    return 0;
   }
 }
 
