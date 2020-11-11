@@ -57,12 +57,7 @@ Bool HostFsFileFind(CDrv *dv,I64 cur_dir_clus,U8 *name,
     if (abs_path && VSysCall(VSYSCALL_STAT, abs_path, &stat, dv->prt_num, 0) == 0) {
       if (!(fuf_flags&FUF_JUST_DIRS && !(stat.attr & RS_ATTR_DIR)) &&
           !(fuf_flags&FUF_JUST_FILES && stat.attr & RS_ATTR_DIR)) {
-        _res->attr=FileAttr(stat.name, stat.attr);
-        StrCpy(_res->name, name);   // FIXME: bounds etc
-        _res->clus=stat.clus;
-        _res->size=stat.size;
-        _res->datetime.date = 0;    // TODO
-        _res->datetime.time = 0;    // TODO
+        HostFsDirEntryInit(_res, &stat);
         res++;
       }
     }
