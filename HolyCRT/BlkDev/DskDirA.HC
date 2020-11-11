@@ -5,6 +5,9 @@ Bool DirNew(CDrv *dv,U8 *cur_dir,CDirEntry *tmpde,Bool free_old_chain=TRUE)
       return RedSeaDirNew(dv,cur_dir,tmpde,free_old_chain);
     case FSt_FAT32:
       return FAT32DirNew(dv,cur_dir,tmpde,free_old_chain);
+    case FSt_HOSTFS:
+      PrintWarn("DirNew(%s, %s) not implemented for FSt_HOSTFS\n", cur_dir, tmpde->full_name);
+      return FALSE;
     default:
       PrintErr("File System Not Supported\n");
       return FALSE;
