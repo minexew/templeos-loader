@@ -241,6 +241,7 @@ def make_import_thunks(f, imports, symbol_suffix):
         plain_name = defn.name
 
         if defn.dynamic_import:
+            resolve_import_func = "ResolveJitImport" + symbol_suffix
             # For imports of JIT-compiled functions the following HolyC helper function is needed:
             #   U8* ResolveJitImport(U8* thunk_addr, U8* func_name)
             # The imported function is resolved and its address returned, so we jump to RAX afterwards.
@@ -256,7 +257,7 @@ def make_import_thunks(f, imports, symbol_suffix):
     push $_s_{plain_name}
     lea {thunk_name}(%rip), %rax
     push %rax
-    call ResolveJitImport$HolyC
+    call {resolve_import_func}
     jmp *%rax
 
 _s_{plain_name}:
