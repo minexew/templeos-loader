@@ -127,9 +127,9 @@ int main(int argc, char** argv) {
     __asm__(
         "movl $0, mem_boot_base(%rip)\r\n"
         "movq $vsyscall_dispatcher, _VSYSCALL_DISPATCHER(%rip)\r\n"
-        "call InitRuntime$Temple\r\n"
-        "call _VKSTART64$Temple\r\n"
-        "call InitRuntime3$Temple\r\n"
+        "call InitRuntime$HolyC\r\n"
+        "call _VKSTART64$HolyC\r\n"
+        "call InitRuntime3$HolyC\r\n"
     );
 
     Cd("/Compiler", false);

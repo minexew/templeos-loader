@@ -251,7 +251,7 @@ def make_import_thunks(f, imports, symbol_suffix):
     push $_s_{plain_name}
     lea 0(%rip), %rax
     push %rax
-    call ResolveJitImport$Temple
+    call ResolveJitImport$HolyC
     pop %rax
     jmp {thunk_name}
 
@@ -271,19 +271,15 @@ _s_{plain_name}:
 {thunk_name}:
     push %rdi
     push %rsi
-    push %rdx
-    push %rcx
-    push %r8
-    push %r9
     push %r10
     push %r11
 """)
 
             if num_args >= 1:
-                f.write("    mov 72(%rsp), %rdi\n")
+                f.write("    mov 40(%rsp), %rdi\n")
             
             if num_args >= 2:
-                f.write("    mov 80(%rsp), %rsi\n")
+                f.write("    mov 48(%rsp), %rsi\n")
 
             if num_args >= 3:
                 raise Exception("Too many arguments, not implemented")
@@ -293,10 +289,6 @@ _s_{plain_name}:
 
     pop %r11
     pop %r10
-    pop %r9
-    pop %r8
-    pop %rcx
-    pop %rdx
     pop %rsi
     pop %rdi
 
@@ -343,7 +335,7 @@ if __name__ == "__main__":
     parser.add_argument("--export-main",
             help="Export entry (IET_MAIN) as the specified name")
     parser.add_argument("--elf-section", default=".text")
-    parser.add_argument("--symbol-suffix", default="$Temple")
+    parser.add_argument("--symbol-suffix", default="$HolyC")
     args = parser.parse_args()
 
     with open(args.binfile, "rb") as f:
@@ -359,8 +351,6 @@ if __name__ == "__main__":
 
     if args.output is not None:
         with open(args.output, "wb") as f:
-            # TODO: parametrize section name
-
             make_object(f, image, relocations, exports,
                         main_symbol_name=args.export_main.encode() if args.export_main is not None else None,
                         section_name=args.elf_section.encode(),
@@ -382,4 +372,3 @@ if __name__ == "__main__":
 """)
 
             write_export_table(f, exports, suffixed=suffixed)
-
