@@ -12,7 +12,8 @@ However, the primary goal is not "to bring HolyC to Linux". The TempleOS program
 ## Building prerequisites
 
 glibc definitely does not appreciate the way we handle memory.
-For this reason, to avoid crashing, you must use a libc that is more "accomodating", such as musl
+For this reason, to avoid crashing, you must use a libc that is more "accomodating", such as musl.
+CMake 3.13 and the Python3 dataclasses module are also required.
 
 ### Build musl libc
 
@@ -44,7 +45,7 @@ For this reason, to avoid crashing, you must use a libc that is more "accomodati
     mkdir -p CmpOutput
 
     env STARTOS=D:/HolyCRT/CmpHolyCRT.HC \
-        ./cmake-build-debug/templeos \
+        ./cmake-build-debug/templeoskernel \
         --drive=C,MiniSystem \
         --drive=D,.,CmpOutput
 
